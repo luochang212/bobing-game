@@ -8,3 +8,8 @@
 *.synctex(busy)
 *.xdv
 .DS_Store
+
+# PDF 输出位置协议：唯一交付 PDF 是 output/pdf/，中间产物在 build/。
+# 根目录出现同名 PDF 即“直接在根目录编译”的散落产物，删除，不入库。
+/博饼规则-A4黑白.pdf
+missfont.log
