@@ -15,9 +15,8 @@
 运行：python3 verify/状态机验证.py
 依赖：仅 Python 3 标准库。
 
-说明：sum_phase_mode='proposed' 是针对"比总和阶段遇真状元骰面"
-这一规格空白的拟修订文案的前置验证，规则纸尚未采用；
-详见 docs/规则核查.md 的"状态机验证"一节。
+说明：sum_phase_mode='proposed' 与规则纸现行结束条款一致（2026-09-11 落地）；
+'literal' 保留为修订前的字面行为，仅作对照。详见 docs/规则核查.md。
 """
 from itertools import product, chain, repeat
 from collections import Counter
