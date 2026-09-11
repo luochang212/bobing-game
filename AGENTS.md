@@ -61,6 +61,10 @@ tex、verify 脚本、docs 描述同一套规则，任何语义修改一次改�
 2. PDF 仍 1 页，yMax ≤ 806，`pdftotext` 抽查确认新措辞已写入；
 3. 若改了流程图，节点/边与脚本状态机逐条对照。
 
+以上两项由 GitHub Actions（`.github/workflows/verify.yml`）在每次 push/PR 时自动
+兜底执行：ubuntu 上跑状态机验证，并用 poppler 检查已提交 PDF 的单页与 yMax 红线。
+PDF 编译因字体依赖不在 CI 内，仍以本机 `make pdf` 为准。
+
 ## 当前已知状态
 
 - 唯一登记在册的规格空白：比总和阶段遇真状元骰面未定义。拟修订文案

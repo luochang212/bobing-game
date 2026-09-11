@@ -1,0 +1,30 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: 规则状态机验证
+        run: python3 verify/状态机验证.py
+
+      - name: 单页与版面约束（检查已提交的交付 PDF）
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
+          PDF="output/pdf/博饼规则-A4黑白.pdf"
+          pages=$(pdfinfo "$PDF" | awk '/^Pages:/{print $2}')
+          echo "页数: $pages"
+          [ "$pages" = "1" ] || { echo "失败：交付 PDF 必须为 1 页"; exit 1; }
+          ymax=$(pdftotext -bbox "$PDF" - | grep -oE 'yMax="[0-9.]+"' | sort -t'"' -k2 -n | tail -1 | grep -oE '[0-9.]+')
+          echo "内容最低点 yMax: ${ymax} pt（安全线 806）"
+          awk -v y="$ymax" 'BEGIN{exit !(y <= 806)}' || { echo "失败：yMax 超出安全线 806"; exit 1; }
