@@ -26,7 +26,7 @@ make pdf
 
 ## 游戏流程
 
-图与 `verify/状态机验证.py` 的实现一一对应。“比总和”阶段按现行规则纸绘制；该阶段若遇真状元骰面属未定义角落，见 `docs/规则核查.md` 的“状态机验证”一节。
+图与 `verify/状态机验证.py` 的实现一一对应（`sum_phase_mode='proposed'` 即现行结束条款）。
 
 ```mermaid
 flowchart TD
@@ -44,7 +44,10 @@ flowchart TD
     check -->|"无人博到过状元"| extra["加赛最后一轮"]
     extra --> check2{"本轮有人博到状元？"}
     check2 -->|"有"| over
-    check2 -->|"仍无"| sum["每人加掷一次，比六颗点数总和"]
+    check2 -->|"仍无"| roll["每人加掷一次"]
+    roll --> check3{"有人掷出状元骰面？"}
+    check3 -->|"有：按第三节比，大者得"| over
+    check3 -->|"无"| sum["比六颗点数总和"]
     sum -->|"总和相同者再掷"| sum
     sum --> over
 ```
