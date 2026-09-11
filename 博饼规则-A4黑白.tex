@@ -1,0 +1,102 @@
+% -*- coding: utf-8 -*-
+% 中秋博饼规则 · A4 黑白单页规则纸
+% 编译：make pdf（使用本机 XeLaTeX 与 macOS 中文字体）
+\documentclass[11pt,a4paper,fontset=none]{ctexart}
+\usepackage[margin={2.0cm,1.7cm}]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+
+% 黑白打印友好：只用灰阶
+\definecolor{rulegray}{gray}{0.55}
+\definecolor{headgray}{gray}{0.82}
+\definecolor{rowgray}{gray}{0.93}
+
+\setCJKmainfont{Songti SC}
+\setCJKsansfont{Hiragino Sans GB}
+\setCJKmonofont{Hiragino Sans GB}
+\pagestyle{empty}
+\linespread{1.12}
+\setlength{\parindent}{0pt}
+\setlist{leftmargin=1.5em,itemsep=2pt,topsep=2pt,parsep=0pt}
+
+\newcommand{\secline}{\noindent\rule{\linewidth}{0.9pt}}
+\newcommand{\thinrule}{\noindent\rule{\linewidth}{0.4pt}}
+\newcommand{\shead}[1]{\vspace{7pt}\noindent{\large\bfseries\sffamily #1}\par\vspace{3pt}}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\sffamily 中秋博饼规则}\\[2pt]
+  {\small 中秋晚会 · 每桌一纸 · 传阅即玩}\\[4pt]
+  {\footnotesize 6 颗骰子 · 1 个大瓷碗 · 一桌 63 块“会饼”}
+\end{center}
+
+\vspace{4pt}
+\secline
+
+\vspace{4pt}
+{\small 博饼是闽南、台湾、金门一带的中秋传统游戏：大家轮流把 \textbf{6 颗骰子}掷入大瓷碗，按掷出的点数组合，赢取分档摆放的月饼（会饼）。骰子的 \textbf{4 点称“红四”}，是整场游戏的关键点数。}
+
+\shead{一、道具准备}
+{\small
+一桌“会饼”共 \textbf{63 块}，分六档：状元 1、对堂 2、三红 4、四进 8、二举 16、一秀 32（即 1+2+4+8+16+32）。按档摆好，4--10 人围桌轮流玩。
+}
+
+\shead{二、玩法步骤}
+{\small
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{摆饼}：63 块饼按六档摆好，众人围桌就座。
+  \item \textbf{掷骰}：从任意一人开始，按顺时针轮流，每次将 6 颗骰子掷入碗中；有骰子跳出碗外则本次无效，重新掷。
+  \item \textbf{取饼}：按掷出的组合拿对应档的饼（见下表）；该档饼已拿完，再掷中则“空”，无饼可拿。
+  \item \textbf{争状元}：掷出比当前更高等级的状元，可“抢”走状元大饼；全部饼分完时，手持最高等级状元者赢得状元饼。
+\end{enumerate}
+}
+
+\shead{三、奖级一览（由高到低）}
+{\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{>{\bfseries}p{2.1cm} X >{\centering\arraybackslash}p{1.6cm}}
+  \rowcolor{headgray}\textbf{奖级} & \textbf{骰子要求（6 颗）} & \textbf{每桌数量}\\
+  \rowcolor{rowgray}状元 & 4 颗以上 4 点，或 5--6 颗同点（细分见下节） & 1 块\\
+  对堂 & 1、2、3、4、5、6 各一颗 & 2 块\\
+  \rowcolor{rowgray}三红 & 恰有 3 颗 4 点 & 4 块\\
+  四进 & 4 颗同点（非 4），其余任意 & 8 块\\
+  \rowcolor{rowgray}二举 & 恰有 2 颗 4 点 & 16 块\\
+  一秀 & 恰有 1 颗 4 点 & 32 块\\
+\end{tabularx}
+\par\vspace{2pt}
+{\footnotesize 注：同一次掷骰同时满足多个条件时，按最高奖级取饼；4 点即“红四”。}
+}
+
+\shead{四、状元大小（同一桌出现多个状元时，由上到下越来越大）}
+{\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\linewidth}{p{3.1cm} X}
+  \rowcolor{headgray}\textbf{组合名称} & \textbf{具体条件}\\
+  四红 & 4 颗 4 点；同为四红时，比剩余两颗点数之和，大者胜\\
+  \rowcolor{rowgray}状元插金花 & 4 颗 4 点 + 2 颗 1 点（部分规则可另赢一个对堂）\\
+  五子登科 & 5 颗同点（非 4），剩 1 颗任意\\
+  \rowcolor{rowgray}五红 & 5 颗 4 点\\
+  六勃黑 & 6 颗同点（非 4）\\
+  \rowcolor{rowgray}六红（满堂红） & 6 颗 4 点，全场最大状元\\
+\end{tabularx}
+}
+
+\shead{五、温馨提示}
+{\small
+\begin{itemize}
+  \item 各地规则在“插金花是否兼得对堂”“状元细分”上略有差异，开局先确认本桌约定。
+  \item 掷骰入碗后不得再碰，以骰子完全静止为准；违规重掷由同桌议定。
+  \item 多博多乐，图个吉利，愿大家中秋团圆、好运连连！
+\end{itemize}
+}
+
+\vspace{6pt}
+\thinrule
+\vspace{4pt}
+{\small 桌号：\underline{\hspace{4cm}} \hfill 祝大家中秋快乐，博个好彩头！}
+
+\end{document}
