@@ -13,6 +13,10 @@ PDF 由源稿编译生成，Python 脚本对规则文字做机器验证，docs �
 - `docs/规则核查.md`：决策与证据的留痕——资料来源、每处修订的原因、已知规格空白。
   改规则必须同步补记。
 - `README.md`：使用说明 + 游戏流程 mermaid 图（与脚本实现一一对应）。
+- `site/`：讲解版网页（Astro + Tailwind，部署到 GitHub Pages，workflow 为
+  `.github/workflows/site.yml`）。定位是"解释与举例"，不是第二份规则权威源：
+  页面措辞逐句对齐 tex，页头注明"以现场纸质规则为准"；改规则若影响页面
+  举例，同步更新。
 - `build/`：编译中间产物。
 
 ## 常用命令
@@ -29,6 +33,10 @@ pdftotext -bbox output/pdf/博饼规则-A4黑白.pdf - \
 编译依赖本机 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）。
 找不到 tex 命令先 `export PATH="/Library/TeX/texbin:$PATH"`。
 换字体或宏包会使非 macOS 环境无法编译，需慎重。
+
+讲解页（site/）：`cd site && npm install && npm run dev` 本地开发，
+`npm run build` 产物在 `site/dist/`；部署由 Actions 自动完成（仅 `site/**`
+变化时触发），规则纸 PDF 由 CI 在部署时复制为 `rules-paper.pdf`。
 
 ## 改规则的"三件套"同步
 

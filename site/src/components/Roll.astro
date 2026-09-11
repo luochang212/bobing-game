@@ -1,0 +1,13 @@
+---
+// 一掷六骰，与规则纸 \roll 命令对应。
+import Die from './Die.astro';
+
+interface Props {
+  faces: number[];
+}
+const { faces } = Astro.props;
+---
+
+<div class="flex flex-wrap items-center gap-[3px]">
+  {faces.map((n) => <Die n={n} />)}
+</div>

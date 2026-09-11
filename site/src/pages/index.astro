@@ -1,0 +1,338 @@
+---
+// 讲解版首页。定位是"解释"，不是第二份规则权威源：内容举例为主，
+// 措辞逐句对齐 博饼规则-A4黑白.tex，语义以 tex 为准。
+import Layout from '../layouts/Layout.astro';
+import Roll from '../components/Roll.astro';
+
+const pdfUrl =
+  import.meta.env.BASE_URL.replace(/\/?$/, '/') + 'rules-paper.pdf';
+const repoUrl = 'https://github.com/luochang212/bobing-game';
+
+const navItems = [
+  ['快速上手', '#qssu'],
+  ['奖级对照', '#jiangji'],
+  ['状元比大小', '#zhuangyuan'],
+  ['异常与结束', '#yichang'],
+  ['常见疑问', '#faq'],
+] as const;
+
+// 第二节：普通奖级（份数 1+2+4+8+16+32 = 63）
+const prizes = [
+  { name: '状元', faces: [4, 4, 4, 4, 2, 6], cond: '至少 4 颗四点，或 5 颗以上同点；见第三节', count: 1, top: true },
+  { name: '对堂', faces: [1, 2, 3, 4, 5, 6], cond: '1、2、3、4、5、6 各 1 颗', count: 2, top: false },
+  { name: '三红', faces: [4, 4, 4, 1, 2, 5], cond: '恰有 3 颗四点', count: 4, top: false },
+  { name: '四进', faces: [2, 2, 2, 2, 4, 6], cond: '恰有 4 颗同点，且该点数不是 4', count: 8, top: false },
+  { name: '二举', faces: [4, 4, 1, 2, 5, 6], cond: '恰有 2 颗四点', count: 16, top: false },
+  { name: '一秀', faces: [4, 1, 1, 2, 3, 5], cond: '恰有 1 颗四点', count: 32, top: false },
+];
+
+// 第三节：状元等级（本场由高到低，只设 1 份状元奖）
+const ranks = [
+  { name: '状元插金花', faces: [4, 4, 4, 4, 1, 1], cond: '4 颗四点＋2 颗一点；本场最高' },
+  { name: '六红', faces: [4, 4, 4, 4, 4, 4], cond: '6 颗四点' },
+  { name: '六同（非四点）', faces: [2, 2, 2, 2, 2, 2], cond: '6 颗同点，非 4（含六个 1）；彼此同级' },
+  { name: '五红', faces: [4, 4, 4, 4, 4, 6], cond: '恰有 5 颗四点；比剩余 1 颗，大者胜' },
+  { name: '五子登科', faces: [2, 2, 2, 2, 2, 6], cond: '恰有 5 颗同点，非 4；只比剩余 1 颗' },
+  { name: '四红', faces: [4, 4, 4, 4, 2, 6], cond: '恰有 4 颗四点，排除插金花；比另 2 颗之和' },
+];
+
+// 常见疑问：全部取自规则纸正文与其例句，不引入新语义。
+const faqs = [
+  {
+    q: '掷出 2、2、2、2、4、4，两个四点能另领二举吗？',
+    a: '不能。只算四进，不另领二举——领奖只认最高奖级，一掷一领。',
+  },
+  {
+    q: '我掷出的奖级，奖品已经发完了怎么办？',
+    a: '本场不兼奖、不降档：所掷奖级发完就空过，不改领其他奖；普通奖不追回，未列组合不中奖。例：四进发完也不改领二举。',
+  },
+  {
+    q: '掷中状元后，还能领普通奖吗？',
+    a: '不能。掷中状元只记名次、不领普通奖；记录员由玩家兼任，记下领先者。状元奖留在桌上，结束时颁给领先者，均不兼奖、不通吃。',
+  },
+  {
+    q: '骰子有一颗掉出碗（出碗）怎么办？',
+    a: '本次无效，换下一位。全部在碗内但叠骰、斜立、点数无法判定时，由同桌确认，6 颗全部重掷。',
+  },
+  {
+    q: '骰面顺序重要吗？',
+    a: '不重要。表中骰面只是一组示例，以文字条件为准，骰子排列顺序不限。',
+  },
+  {
+    q: '62 份普通奖都发完了，还没人博到状元怎么办？',
+    a: '完成当前一轮（至首位玩家的前一位掷完）再定状元；仍无人博到则加赛最后一轮；该轮过后仍无人博到，则每人再掷一次：掷出状元的按第三节比大小，都未掷出比六颗点数总和，最大者得状元奖，总和相同者再掷，直至分出。',
+  },
+];
+
+const paperVer = '2026-09-12';
+---
+
+<Layout
+  title="中秋博饼规则 · 讲解版"
+  description="中秋博饼讲解版：快速上手、奖级对照、状元比大小与常见疑问。以现场纸质规则为准。"
+>
+  <!-- 吸顶导航 -->
+  <header
+    class="sticky top-0 z-40 border-b border-line bg-paper/90 backdrop-blur"
+  >
+    <div
+      class="mx-auto flex max-w-3xl items-center justify-between gap-3 px-5 py-2.5"
+    >
+      <span class="text-[13px] font-semibold whitespace-nowrap">中秋博饼 · 讲解版</span>
+      <nav
+        class="flex gap-4 overflow-x-auto whitespace-nowrap text-[13px] text-ink-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {
+          navItems.map(([label, href]) => (
+            <a href={href} data-nav class="nav-chip press py-1">
+              {label}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-3xl px-5">
+    <!-- 页头 -->
+    <section class="flex items-start justify-between gap-4 pt-10 pb-6">
+      <div>
+        <p class="t-eyebrow">Bobing · Mid-Autumn Festival</p>
+        <h1 class="t-display mt-2 text-ink">中秋博饼规则</h1>
+        <p class="mt-2 text-[14px] text-ink-2">
+          本次活动统一版 · 六颗骰子，一碗好运
+        </p>
+        <p class="t-meta mt-1">
+          每桌 63 份奖品 · 阅读约 4 分钟 · 更新于 {paperVer}
+        </p>
+        <span
+          class="mt-3 inline-block rounded-full border border-line-strong px-3 py-1 text-[12.5px] text-ink-2"
+        >
+          讲解仅供参考，以现场纸质规则为准
+        </span>
+      </div>
+      <!-- 朱印：全页唯二的彩色之一，呼应印刷版"博"印 -->
+      <div
+        aria-hidden="true"
+        class="mt-1 flex h-11 w-11 shrink-0 rotate-[-8deg] items-center justify-center rounded-[4px] bg-vermilion font-serif text-[24px] font-semibold text-white/95"
+      >
+        博
+      </div>
+    </section>
+    <hr class="border-t-2 border-ink" />
+
+    <!-- 01 快速上手 -->
+    <section id="qssu" class="pt-9">
+      <div class="eyebrow">
+        <span class="t-eyebrow">01</span><span class="rule"></span
+        ><span class="t-eyebrow !text-ink !tracking-normal">快速上手</span>
+      </div>
+      <h2 class="t-section mt-3">三个动作，开始博饼</h2>
+      <p class="t-body mt-2">
+        每桌：<b class="font-semibold text-ink">6 颗骰子 · 1 个大碗 · 63 份奖品</b>，奖品按六档摆好。
+      </p>
+      <ol class="mt-3 space-y-2.5">
+        <li class="flex gap-3">
+          <span class="t-eyebrow mt-[5px] shrink-0">1</span>
+          <p class="t-body">
+            <b class="font-semibold text-ink">开局：</b>指定首位玩家；顺时针轮流（掷完传左手边），每人一次，轮完为一轮。
+          </p>
+        </li>
+        <li class="flex gap-3">
+          <span class="t-eyebrow mt-[5px] shrink-0">2</span>
+          <p class="t-body">
+            <b class="font-semibold text-ink">掷骰：</b>一次将 6 颗骰子全部掷入碗中，完全静止后看朝上的点数；大家确认前不要碰骰子。
+          </p>
+        </li>
+        <li class="flex gap-3">
+          <span class="t-eyebrow mt-[5px] shrink-0">3</span>
+          <p class="t-body">
+            <b class="font-semibold text-ink">领奖：</b>按奖级表从上往下，<b class="font-semibold text-ink">只认最高奖级</b>。普通奖每次领 1 份；未中奖也换下一位，不连掷。
+          </p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 02 奖级对照 -->
+    <section id="jiangji" class="pt-9">
+      <div class="eyebrow">
+        <span class="t-eyebrow">02</span><span class="rule"></span
+        ><span class="t-eyebrow !text-ink !tracking-normal">奖级对照</span>
+      </div>
+      <h2 class="t-section mt-3">六档奖级，由高到低</h2>
+      <p class="t-body mt-2 text-[13.5px] leading-relaxed text-ink-3">
+        图中为一组示例，以文字条件为准，骰子排列顺序不限。网页版以<span class="text-vermilion">朱砂色骰面</span>表示"红四"；纸质版因黑白印刷，以黑底白"4"表示。
+      </p>
+      <!-- gap 当分割线：容器底色即线色，子项自盖背景 -->
+      <div class="mt-3 grid gap-px border border-line bg-line">
+        {
+          prizes.map((p) => (
+            <div class="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 bg-card px-4 py-3.5 sm:grid-cols-[5.5rem_14rem_1fr_2.5rem] sm:gap-y-0">
+              <h3 class="order-1 self-center font-serif text-[16px] font-semibold leading-none">
+                {p.top && (
+                  <span
+                    aria-hidden="true"
+                    class="mr-1.5 inline-block h-[7px] w-[7px] -translate-y-[2px] bg-vermilion"
+                  />
+                )}
+                {p.name}
+              </h3>
+              <div class="order-2 text-right sm:order-4 sm:text-right">
+                <span class="font-mono text-[15px] font-semibold tabular-nums">
+                  {p.count}
+                </span>
+                <span class="ml-0.5 text-[12px] text-ink-3">份</span>
+              </div>
+              <div class="order-3 sm:order-2 sm:self-center">
+                <Roll faces={p.faces} />
+              </div>
+              <p class="t-body order-4 col-span-2 self-center text-[13.5px] leading-relaxed sm:order-3 sm:col-span-1">
+                {p.cond}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+      <p class="t-body mt-3">
+        <b class="font-semibold text-ink">本场不兼奖、不降档：</b>所掷奖级发完就空过，不改领其他奖；普通奖不追回，未列组合不中奖。
+      </p>
+      <p class="t-meta mt-1">例：2、2、2、2、4、4 只算四进，不另领二举；四进发完也不改领二举。</p>
+    </section>
+
+    <!-- 03 状元比大小 -->
+    <section id="zhuangyuan" class="pt-9">
+      <div class="eyebrow">
+        <span class="t-eyebrow">03</span><span class="rule"></span
+        ><span class="t-eyebrow !text-ink !tracking-normal">状元比大小</span>
+      </div>
+      <h2 class="t-section mt-3">由高到低，只设 1 份状元奖</h2>
+      <div class="mt-3 grid gap-px border border-line bg-line">
+        {
+          ranks.map((r) => (
+            <div class="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 bg-card px-4 py-3.5 sm:grid-cols-[7.5rem_14rem_1fr] sm:gap-y-0">
+              <h3 class="order-1 self-center font-serif text-[16px] font-semibold leading-none">
+                {r.name}
+              </h3>
+              <div class="order-3 sm:order-2 sm:self-center">
+                <Roll faces={r.faces} />
+              </div>
+              <p class="t-body order-4 col-span-2 self-center text-[13.5px] leading-relaxed sm:order-3 sm:col-span-1">
+                {r.cond}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+      <p class="t-body mt-3">
+        <b class="font-semibold text-ink">先比等级，再比点数，大者领先；相同则先得者保留。</b>每人只记最好成绩。掷中状元只记名次、不领普通奖；状元奖留在桌上，结束时颁给领先者，均不兼奖、不通吃。
+      </p>
+    </section>
+
+    <!-- 04 异常与结束 -->
+    <section id="yichang" class="pt-9">
+      <div class="eyebrow">
+        <span class="t-eyebrow">04</span><span class="rule"></span
+        ><span class="t-eyebrow !text-ink !tracking-normal">异常与结束</span>
+      </div>
+      <h2 class="t-section mt-3">遇到情况，按此执行</h2>
+      <ol class="mt-3 space-y-2.5">
+        <li class="flex gap-3">
+          <p class="t-body">
+            <b class="font-semibold text-ink">出碗：</b>任何一颗未入碗或跳出碗，本次无效，换下一位。
+          </p>
+        </li>
+        <li class="flex gap-3">
+          <p class="t-body">
+            <b class="font-semibold text-ink">叠骰、斜立：</b>全部在碗内但点数无法判定时，由同桌确认，6 颗全部重掷。
+          </p>
+        </li>
+        <li class="flex gap-3">
+          <p class="t-body">
+            <b class="font-semibold text-ink">结束：</b>除状元外的 62 份奖品发完后，完成当前一轮（至首位玩家的前一位掷完），再定状元。若此时仍无人博到状元，加赛最后一轮；该轮过后仍无人博到，则每人再掷一次——掷出状元的按第三节比，都未掷出比六颗点数总和，最大者得状元奖，总和相同者再掷，直至分出。
+          </p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 05 常见疑问 -->
+    <section id="faq" class="pt-9">
+      <div class="eyebrow">
+        <span class="t-eyebrow">05</span><span class="rule"></span
+        ><span class="t-eyebrow !text-ink !tracking-normal">常见疑问</span>
+      </div>
+      <h2 class="t-section mt-3">桌上吵起来时，查这里</h2>
+      <div class="mt-3 overflow-hidden rounded-xl border border-line bg-card">
+        {
+          faqs.map((f, i) => (
+            <div class="faq-item border-line not-first:border-t">
+              <button
+                type="button"
+                class="faq-q press flex w-full items-center justify-between gap-4 px-4 py-3.5 text-left"
+                aria-expanded="false"
+              >
+                <span class="text-[14.5px] font-semibold text-ink">{f.q}</span>
+                <span
+                  aria-hidden="true"
+                  class="faq-icon shrink-0 font-mono text-[18px] leading-none text-ink-3"
+                >
+                  +
+                </span>
+              </button>
+              <div class="faq-a">
+                <div>
+                  <p class="t-body px-4 pb-4 text-[13.5px]">{f.a}</p>
+                </div>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="mt-10 border-t border-line pb-10 pt-5">
+      <p class="t-meta">
+        各地博饼习俗略有不同，本次活动统一以现场纸质规则为准。奖品可用月饼或礼品。祝大家中秋快乐！
+      </p>
+      <p class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
+        <a class="press text-ink underline decoration-line-strong underline-offset-4" href={pdfUrl}>
+          下载规则纸 PDF（打印用）
+        </a>
+        <a class="press text-ink underline decoration-line-strong underline-offset-4" href={repoUrl} rel="noopener">
+          GitHub 仓库
+        </a>
+      </p>
+      <p class="t-eyebrow mt-4">Ver {paperVer} · Synced with paper · Not a rule source</p>
+    </footer>
+  </main>
+
+  <script>
+    // FAQ 手风琴（事件委托）
+    document.querySelectorAll('.faq-q').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.faq-item');
+        if (!item) return;
+        const open = item.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    });
+
+    // 吸顶导航 scrollspy：当前分节对应的 chip 加下划线
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[data-nav]'));
+    const byId = new Map(links.map((a) => [a.hash.slice(1), a]));
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          links.forEach((l) => l.removeAttribute('data-active'));
+          byId.get((e.target as HTMLElement).id)?.setAttribute('data-active', '');
+        }
+      },
+      { rootMargin: '-25% 0px -65% 0px' }
+    );
+    byId.forEach((_, id) => {
+      const el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+  </script>
+</Layout>
