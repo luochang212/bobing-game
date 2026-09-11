@@ -9,6 +9,7 @@
 - `.latexmkrc`：默认使用 XeLaTeX，编译中间文件集中在 `build/`。
 - `Makefile`：编译并复制最终 PDF。
 - `docs/规则核查.md`：资料依据、旧稿问题与新版采用的约定。
+- `verify/状态机验证.py`：规则状态机的自动化验证（全枚举、确定性剧本、随机整局模拟），`python3 verify/状态机验证.py` 运行，仅依赖标准库。
 - `build/`：编译产物；`build/previous/` 保存整理前的失败编译记录。
 
 ## 本机生成
@@ -22,6 +23,31 @@ make pdf
 请使用 XeLaTeX 编译；pdfLaTeX 不支持源稿使用的系统字体设置。如果终端找不到 TeX 命令，可先执行 `export PATH="/Library/TeX/texbin:$PATH"`。
 
 打印时选择 A4 纵向、实际大小（100%）和黑白打印。
+
+## 游戏流程
+
+图与 `verify/状态机验证.py` 的实现一一对应。“比总和”阶段按现行规则纸绘制；该阶段若遇真状元骰面属未定义角落，见 `docs/规则核查.md` 的“状态机验证”一节。
+
+```mermaid
+flowchart TD
+    start(["开局：摆好六档奖品，指定首位玩家"]) --> normal
+
+    normal["普通轮次：顺时针轮流（掷完传左手边），每人一掷"]
+    normal -->|"掷出普通奖且该档有货：领 1 份"| normal
+    normal -->|"掷出普通奖但该档已空：空过，不改领其他奖"| normal
+    normal -->|"未列出的组合：不中奖"| normal
+    normal -->|"掷出状元：只记名次，不领普通奖"| normal
+
+    normal -->|"62 份普通奖全部领完"| finish["补完当前一轮（至首位玩家的前一位掷完）"]
+    finish --> check{"有状元领先者？"}
+    check -->|"有"| over(["结束：状元奖颁给领先者"])
+    check -->|"无人博到过状元"| extra["加赛最后一轮"]
+    extra --> check2{"本轮有人博到状元？"}
+    check2 -->|"有"| over
+    check2 -->|"仍无"| sum["每人加掷一次，比六颗点数总和"]
+    sum -->|"总和相同者再掷"| sum
+    sum --> over
+```
 
 ## 内容说明
 
