@@ -16,30 +16,30 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0pt}
 \setlength{\tabcolsep}{6pt}
-\setlist[enumerate]{leftmargin=1.6em,label=\textbf{\arabic*.},itemsep=1pt,topsep=2pt,parsep=0pt}
+\setlist[enumerate]{leftmargin=1.6em,label=\textbf{\arabic*.},itemsep=2pt,topsep=3pt,parsep=0pt}
 \definecolor{headgray}{gray}{0.84}
 \definecolor{rowgray}{gray}{0.95}
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
-\newcommand{\shead}[1]{\par\vspace{7pt}{\fontsize{12}{16}\selectfont\bfseries\sffamily #1}\par\vspace{3pt}}
+\newcommand{\shead}[1]{\par\vspace{10pt}{\fontsize{12.5}{17}\selectfont\bfseries\sffamily #1}\par\vspace{4pt}}
 % 用方框数字表示骰面；4 点用黑底白字，在黑白复印件上也可辨识。
 \newcommand{\die}[1]{%
   \begin{tikzpicture}[baseline=0.5ex]
     \ifnum#1=4
-      \filldraw[black,line width=0.45pt,rounded corners=0.7pt] (0,0) rectangle (0.36,0.36);
-      \node[text=white,inner sep=0pt,font=\sffamily\bfseries\fontsize{8}{8}\selectfont] at (0.18,0.18) {#1};
+      \filldraw[black,line width=0.5pt,rounded corners=0.8pt] (0,0) rectangle (0.40,0.40);
+      \node[text=white,inner sep=0pt,font=\sffamily\bfseries\fontsize{9}{9}\selectfont] at (0.20,0.20) {#1};
     \else
-      \draw[line width=0.45pt,rounded corners=0.7pt] (0,0) rectangle (0.36,0.36);
-      \node[inner sep=0pt,font=\sffamily\fontsize{8}{8}\selectfont] at (0.18,0.18) {#1};
+      \draw[line width=0.5pt,rounded corners=0.8pt] (0,0) rectangle (0.40,0.40);
+      \node[inner sep=0pt,font=\sffamily\fontsize{9}{9}\selectfont] at (0.20,0.20) {#1};
     \fi
   \end{tikzpicture}%
 }
 \newcommand{\roll}[6]{\die{#1}\,\die{#2}\,\die{#3}\,\die{#4}\,\die{#5}\,\die{#6}}
 
 \begin{document}
-\fontsize{10.5}{15}\selectfont
+\fontsize{11}{16}\selectfont
 \begin{center}
-  {\fontsize{23}{28}\selectfont\bfseries\sffamily 中秋博饼规则}\\[4pt]
-  {\fontsize{10}{14}\selectfont 本次晚会统一版\quad |\quad 六颗骰子，一碗好运}\\[4pt]
+  {\fontsize{25}{30}\selectfont\bfseries\sffamily 中秋博饼规则}\\[5pt]
+  {\fontsize{10.5}{14.5}\selectfont 本次晚会统一版\quad |\quad 六颗骰子，一碗好运}\\[5pt]
   每桌：\textbf{6 颗骰子 · 1 个大碗 · 63 份奖品}
 \end{center}
 \vspace{-3pt}\hrule height 0.8pt
@@ -52,12 +52,12 @@
 \end{enumerate}
 
 \shead{二、奖级对照表（由高到低）}
-{\fontsize{9}{12}\selectfont 黑底“4”表示四点，俗称“红四”。图中为\textbf{一组示例}，以文字条件为准，骰子排列顺序不限。\par}
+{\fontsize{9.5}{13}\selectfont 黑底“4”表示四点，俗称“红四”。图中为\textbf{一组示例}，以文字条件为准，骰子排列顺序不限。\par}
 \vspace{3pt}
 {\renewcommand{\arraystretch}{1.28}
 \begin{tabularx}{\linewidth}{p{2.35cm} >{\centering\arraybackslash}p{3.1cm} L >{\centering\arraybackslash}p{0.85cm}}
 \rowcolor{headgray}\textbf{奖级} & \textbf{骰面示例} & \textbf{判定条件} & \textbf{份数}\\
-状元 & \roll{4}{4}{4}{4}{2}{6} & 至少 4 颗四点或 5 颗同点；见第三节 & 1\\
+状元 & \roll{4}{4}{4}{4}{2}{6} & 至少 4 颗四点，或 5 颗以上同点；见第三节 & 1\\
 \rowcolor{rowgray}对堂 & \roll{1}{2}{3}{4}{5}{6} & 1、2、3、4、5、6 各 1 颗 & 2\\
 三红 & \roll{4}{4}{4}{1}{2}{5} & 恰有 3 颗四点 & 4\\
 \rowcolor{rowgray}四进 & \roll{2}{2}{2}{2}{4}{6} & 恰有 4 颗同点，且该点数不是 4 & 8\\
@@ -66,10 +66,10 @@
 \end{tabularx}\par}
 \vspace{3pt}
 \textbf{本场不兼奖、不降档：}最高奖级已发完就空过，普通奖不追回；未列出的组合不中奖。\\
-{\fontsize{9}{12}\selectfont 例：2、2、2、2、4、4 只算四进，不另领二举；四进发完也不改领二举。\par}
+{\fontsize{9.5}{13}\selectfont 例：2、2、2、2、4、4 只算四进，不另领二举；四进发完也不改领二举。\par}
 
 \shead{三、状元比大小（本场由高到低，只设 1 份状元奖）}
-{\renewcommand{\arraystretch}{1.25}
+{\renewcommand{\arraystretch}{1.24}
 \begin{tabularx}{\linewidth}{p{2.35cm} >{\centering\arraybackslash}p{3.1cm} L}
 \rowcolor{headgray}\textbf{状元等级} & \textbf{骰面示例} & \textbf{条件／同级比较}\\
 状元插金花 & \roll{4}{4}{4}{4}{1}{1} & 4 颗四点＋2 颗一点；\textbf{本场最高}\\
@@ -84,11 +84,11 @@
 
 \shead{四、异常与结束，按此执行}
 \textbf{出碗：}任何一颗未入碗或跳出碗，本次无效，换下一位。\textbf{叠骰、斜立：}全部在碗内但点数无法判定时，由同桌确认，6 颗全部重掷。\\
-\textbf{结束：}除状元外的 62 份奖品发完后，完成当前一轮（至首位玩家的前一位掷完），再定状元。若仍无人掷出状元，继续完整轮次，直至某轮出现状元，完成该轮后结束。
+\textbf{结束：}除状元外的 62 份奖品发完后，完成当前一轮（至首位玩家的前一位掷完），再定状元。若此时仍无人博到状元，加赛最后一轮；该轮过后仍无人博到，则每人再掷一次，比六颗点数总和，最大者得状元奖，总和相同者再掷，直至分出。
 
 \vspace{7pt}\hrule height 0.4pt\vspace{5pt}
-{\fontsize{9.5}{13}\selectfont
-桌号：\underline{\hspace{1.1cm}}\quad 首位玩家：\underline{\hspace{1.55cm}}\quad 状元领先者：\underline{\hspace{1.7cm}}\quad 点数：\underline{\hspace{2.6cm}}\par}
+{\fontsize{10}{15}\selectfont
+桌号：\underline{\hspace{1.2cm}}\quad 状元领先者：\underline{\hspace{2.4cm}}\quad 点数（六颗）：\underline{\hspace{3.4cm}}\par}
 \vspace{3pt}
-{\fontsize{8.5}{11}\selectfont 各地博饼习俗略有不同，本次晚会统一以上述规则为准。奖品可用月饼或礼品。祝大家中秋快乐！\par}
+{\fontsize{9}{12}\selectfont 各地博饼习俗略有不同，本次晚会统一以上述规则为准。奖品可用月饼或礼品。祝大家中秋快乐！\par}
 \end{document}
