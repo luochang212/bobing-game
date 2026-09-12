@@ -1,0 +1,109 @@
+% !TEX program = xelatex
+% -*- coding: utf-8 -*-
+% 版本：grand-final——各桌独立博饼，各桌博出的状元晋级全场“状元王”加赛。
+% 共享规则段落与 classic 一致，由 scripts/version_consistency.py 兜底。
+% 中秋活动统一规则；A4 黑白单页。编译：make pdf
+% 各地特殊玩法不同，本稿的排序、兼奖、平局与结束方式为本场约定。
+\documentclass[11pt,a4paper,fontset=none]{ctexart}
+\usepackage[left=1.65cm,right=1.65cm,top=1.25cm,bottom=1.25cm]{geometry}
+\usepackage{tikz}
+\usepackage{array,tabularx}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{qrcode}
+\setCJKmainfont{Songti SC}
+\setCJKsansfont{Hiragino Sans GB}
+\setCJKmonofont{Hiragino Sans GB}
+\pagestyle{empty}
+\linespread{1.06}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{6pt}
+\setlist[enumerate]{leftmargin=1.6em,label=\textbf{\arabic*.},itemsep=2pt,topsep=3pt,parsep=0pt}
+\definecolor{headgray}{gray}{0.16}
+\definecolor{rowgray}{gray}{0.95}
+\definecolor{rulegray}{gray}{0.72}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcommand{\shead}[2]{\par\vspace{7pt}%
+  {\fontsize{12.5}{17}\selectfont\bfseries\sffamily
+  #1、#2\hspace{10pt}{\color{rulegray}\leaders\hrule height 0.3pt\hfill}\kern0pt\par}\vspace{4pt}}
+\newcommand{\tablehead}[1]{\textcolor{white}{\textsf{\textbf{#1}}}}
+% 用方框数字表示骰面；4 点用黑底白字，在黑白复印件上也可辨识。
+\newcommand{\die}[1]{%
+  \begin{tikzpicture}[baseline=0.5ex]
+    \ifnum#1=4
+      \filldraw[black,line width=0.5pt,rounded corners=0.8pt] (0,0) rectangle (0.40,0.40);
+      \node[text=white,inner sep=0pt,font=\sffamily\bfseries\fontsize{9}{9}\selectfont] at (0.20,0.20) {#1};
+    \else
+      \draw[line width=0.5pt,rounded corners=0.8pt] (0,0) rectangle (0.40,0.40);
+      \node[inner sep=0pt,font=\sffamily\fontsize{9}{9}\selectfont] at (0.20,0.20) {#1};
+    \fi
+  \end{tikzpicture}%
+}
+\newcommand{\roll}[6]{\die{#1}\,\die{#2}\,\die{#3}\,\die{#4}\,\die{#5}\,\die{#6}}
+
+\begin{document}
+\fontsize{11}{16}\selectfont
+\begin{minipage}[c]{0.79\linewidth}
+  {\fontsize{28}{34}\selectfont\bfseries 中秋博饼规则\par}
+  \vspace{7pt}
+  {\fontsize{10.5}{14.5}\selectfont 本次活动统一版\quad |\quad 六颗骰子，一碗好运\par}
+  \vspace{7pt}
+  {\fontsize{10.5}{14.5}\selectfont 每桌：\textbf{6 颗骰子 · 1 个大碗 · 63 份奖品}\par}
+\end{minipage}\hfill
+\begin{minipage}[c]{0.18\linewidth}
+  \centering
+  % padding 保留四模块留白；二维码为矢量，随 PDF 打印不失真。
+  \qrcode[height=20mm,level=M,padding]{https://www.luochang.ink/bobing-game/}\par
+  {\fontsize{9}{11}\selectfont\sffamily 扫码看规则\par}
+\end{minipage}\par
+\vspace{5pt}\hrule height 0.8pt
+
+\shead{一}{轮流掷骰，按点领奖}
+\begin{enumerate}
+  \item \textbf{开局}：摆好六档奖品，指定首位玩家。顺时针轮流，每人一掷，掷完传左手边，所有人掷完为一轮。
+  \item \textbf{掷骰}：一次将 6 颗骰子全部掷入碗中，完全静止后看朝上的点数；大家确认前不要碰骰子。
+  \item \textbf{领奖}：按下表\textbf{从上往下，只认最高奖级}。普通奖每次领 1 份；未中奖也换下一位，不连掷。
+\end{enumerate}
+
+\shead{二}{奖级从高到低，只认最高一档}
+{\fontsize{9.5}{13}\selectfont 黑底“4”表示四点，俗称“红四”。图中为\textbf{一组示例}，以文字条件为准，骰子排列顺序不限。\par}
+\vspace{3pt}
+{\renewcommand{\arraystretch}{1.28}
+\begin{tabularx}{\linewidth}{p{2.35cm} >{\centering\arraybackslash}p{3.1cm} L >{\centering\arraybackslash}p{0.85cm}}
+\rowcolor{headgray}\tablehead{奖级} & \tablehead{骰面示例} & \tablehead{判定条件} & \tablehead{份数}\\
+状元 & \roll{4}{4}{4}{4}{2}{6} & 至少 4 颗四点，或 5 颗以上同点；见第三节 & 1\\
+\rowcolor{rowgray}对堂 & \roll{1}{2}{3}{4}{5}{6} & 1、2、3、4、5、6 各 1 颗 & 2\\
+三红 & \roll{4}{4}{4}{1}{2}{5} & 恰有 3 颗四点 & 4\\
+\rowcolor{rowgray}四进 & \roll{2}{2}{2}{2}{4}{6} & 恰有 4 颗同点，且该点数不是 4 & 8\\
+二举 & \roll{4}{4}{1}{2}{5}{6} & 恰有 2 颗四点 & 16\\
+\rowcolor{rowgray}一秀 & \roll{4}{1}{1}{2}{3}{5} & 恰有 1 颗四点 & 32\\
+\end{tabularx}\par}
+\vspace{3pt}
+\textbf{本场不兼奖、不降档：}所掷奖级发完就空过，不改领其他奖；普通奖不追回，未列组合不中奖。\\
+{\fontsize{9.5}{13}\selectfont 例：2、2、2、2、4、4 只算四进，不另领二举；四进发完也不改领二举。\par}
+
+\shead{三}{状元比大小，从高往下比}
+{\renewcommand{\arraystretch}{1.24}
+\begin{tabularx}{\linewidth}{p{2.35cm} >{\centering\arraybackslash}p{3.1cm} L}
+\rowcolor{headgray}\tablehead{状元等级} & \tablehead{骰面示例} & \tablehead{条件／同级比较}\\
+状元插金花 & \roll{4}{4}{4}{4}{1}{1} & 4 颗四点＋2 颗一点；\textbf{本场最高}\\
+\rowcolor{rowgray}六红 & \roll{4}{4}{4}{4}{4}{4} & 6 颗四点\\
+六同 & \roll{2}{2}{2}{2}{2}{2} & 6 颗同点，四点除外，一点也算；彼此同级\\
+\rowcolor{rowgray}五红 & \roll{4}{4}{4}{4}{4}{6} & 恰有 5 颗四点；比剩余 1 颗，大者胜\\
+五子登科 & \roll{2}{2}{2}{2}{2}{6} & 恰有 5 颗同点，非 4；\textbf{只比剩余 1 颗}\\
+\rowcolor{rowgray}四红 & \roll{4}{4}{4}{4}{2}{6} & 恰有 4 颗四点，排除插金花；比另 2 颗之和\\
+\end{tabularx}\par}
+\vspace{3pt}
+\textbf{先比等级，再比点数，大者领先；相同则先得者保留。}每人只记最好成绩。掷中状元只记名次、不领普通奖；记录员由玩家兼任，记下领先者。状元奖留在桌上，结束时颁给领先者，均不兼奖、不通吃。
+
+\shead{四}{小提醒与收尾}
+\textbf{出碗：}任何一颗未入碗或跳出碗，这一掷不计，换下一位。\textbf{叠骰、斜立：}全部在碗内但点数无法判定时，由同桌确认，6 颗全部重掷。\\
+\textbf{结束：}除状元外的 62 份奖品发完后，补完当前一轮，掷到首位玩家的前一位为止，再定状元。若仍无人博到状元，加赛最后一轮。加赛后仍无人博到，每人再掷一次。有人掷出状元，就按第三节比较；都未掷出，就比六颗点数总和。总和最大者得状元奖；总和相同者再掷，直至分出。
+
+\vspace{7pt}\hrule height 0.4pt\vspace{5pt}
+{\fontsize{10}{15}\selectfont
+桌号：\underline{\hspace{1.2cm}}\quad 状元：\underline{\hspace{2.4cm}}\quad 六颗骰面：\underline{\hspace{3.4cm}}\par}
+\vspace{3pt}
+{\fontsize{9}{12}\selectfont 各桌独立博饼，博出的状元晋级全场“状元王”加赛，安排见扫码页。奖品可用月饼或礼品，祝大家中秋快乐！\par}
+\end{document}
