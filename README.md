@@ -39,6 +39,8 @@
 2. 每桌准备以下物料，按六档摆好奖品。
 3. 指定首位玩家，由一位玩家兼任记录员。顺时针轮流掷骰，掷完传左手边。
 
+规则纸右上角印有二维码，扫码即可在手机上阅读[讲解版规则](https://www.luochang.ink/bobing-game/)，方便同桌同时查看。
+
 | 物料 | 每桌数量 |
 | --- | --- |
 | 规则纸 | 1 张 |
@@ -114,6 +116,7 @@ flowchart TD
 | 规则纸排版 | LaTeX、MacTeX（latexmk + XeLaTeX）、macOS 字体 |
 | 讲解网页 | Astro、Tailwind CSS、Node.js 与 npm |
 | 规则验证 | Python 3，仅依赖标准库 |
+| PDF 预览与二维码核查 | Poppler、Python 3 + Pillow / ZXing-C++ |
 | 网页回归检查 | Python 3 + Playwright（Chromium / WebKit） |
 | 自动检查与部署 | GitHub Actions、Poppler、GitHub Pages |
 
@@ -140,6 +143,26 @@ make pdf
 本稿使用 XeLaTeX，pdfLaTeX 不支持当前字体设置。请统一通过 `make pdf` 编译。
 
 </details>
+
+### 生成预览与核查二维码
+
+二维码地址直接写在 TeX 的 `\qrcode` 命令中，由 MacTeX 自带宏包生成矢量图。改地址后运行 `make pdf`，再用[输出验证脚本](verify/规则纸输出验证.py)检查并更新预览。
+
+首次准备核查环境：
+
+```sh
+brew install poppler
+python3 -m venv tmp/pdf-tools
+tmp/pdf-tools/bin/pip install pillow zxing-cpp
+```
+
+每次编译后运行：
+
+```sh
+tmp/pdf-tools/bin/python verify/规则纸输出验证.py --preview-output docs/preview.png
+```
+
+脚本检查单页与 806pt 底部安全线，在 `tmp/pdf-review/` 生成提取文字及 100、150、300 DPI 图片，并逐张解码二维码，核对目标地址。全部通过后才更新 README 预览。纯排版修改时可附加 `--compare-ref <提交号>`，对照该版本的规则正文；更换网址时同时传入 `--url <新地址>`。核查依赖不参与 PDF 编译。
 
 ### 启动讲解网页
 
@@ -202,6 +225,7 @@ python3 verify/状态机验证.py
 | [output/pdf/博饼规则-A4黑白.pdf](output/pdf/博饼规则-A4黑白.pdf) | 唯一交付 PDF，由 `make pdf` 生成 |
 | [site/](site/) | 讲解网页，含骰面示例与常见疑问 |
 | [verify/状态机验证.py](verify/状态机验证.py) | 规则状态机与验证脚本 |
+| [verify/规则纸输出验证.py](verify/规则纸输出验证.py) | PDF 单页、底部安全线、预览渲染与二维码解码核查 |
 | [verify/网页阅读验证.py](verify/网页阅读验证.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
 | [docs/规则核查.md](docs/规则核查.md) | 资料来源、修订原因与验证记录 |
 | [docs/assets/](docs/assets/) / [docs/preview.png](docs/preview.png) | README 头图与规则纸预览 |

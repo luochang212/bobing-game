@@ -12,6 +12,8 @@ PDF 由源稿编译生成，Python 脚本对规则文字做机器验证，docs �
   全枚举归类、19 项确定性剧本、随机整局模拟）。它镜像 tex 的规则，改规则必须同步改。
 - `verify/网页阅读验证.py`：讲解页的浏览器回归检查（七种视口 × Chromium/WebKit、
   目录跳转、无脚本阅读），依赖 Playwright，运行方式见 `docs/移动端阅读核查.md`。
+- `verify/规则纸输出验证.py`：检查 PDF 单页与底部安全线，渲染三档清晰度并解码
+  二维码，可更新 `docs/preview.png`；依赖与命令见 README。
 - `docs/规则核查.md`：决策与证据的留痕——资料来源、每处修订的原因、已知规格空白。
   改规则必须同步补记。
 - `docs/移动端阅读核查.md`：网页阅读体验的核查记录——两轮修订的判断依据与
@@ -34,7 +36,8 @@ pdftotext -bbox output/pdf/博饼规则-A4黑白.pdf - \
 # yMax 为内容最低点；页高 841.89pt，下边距 1.25cm≈35.5pt，必须 ≤ 806
 ```
 
-编译依赖本机 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）。
+编译依赖本机 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）；右上角二维码由
+MacTeX 自带的 `qrcode` 宏包直接生成，目标为 `https://www.luochang.ink/bobing-game/`。
 找不到 tex 命令先 `export PATH="/Library/TeX/texbin:$PATH"`。
 换字体或宏包会使非 macOS 环境无法编译，需慎重。
 
@@ -56,8 +59,8 @@ tex、verify 脚本、docs 描述同一套规则，任何语义修改一次改�
 - **PDF 输出位置协议**：仓库唯一交付 PDF 是 `output/pdf/博饼规则-A4黑白.pdf`；编译一律走
   `make pdf`（latexmk 中间产物只落 `build/`）。禁止在仓库根目录直接运行 xelatex——根目录
   或 `output/` 之外出现同名 PDF 即散落产物，直接删除，不入库、不 review。
-- **单页**：任何改动后 PDF 页数必须仍为 1。当前内容底部约 795pt，安全线
-  806pt，余量仅约 11pt——新增整行文字必然溢出，先想清楚删什么或压哪里。
+- **单页**：任何改动后 PDF 页数必须仍为 1。当前内容底部约 798pt，安全线
+  806pt，余量仅约 8pt——新增整行文字必然溢出，先想清楚删什么或压哪里。
 - **黑白**：只用灰阶与黑底白字（黑底"4"表示红四，是黑白印刷对红色的替代），
   不得引入彩色。
 - **排版方向**：版面按"留白转化为行距与字号"优化过，不要为填空间编造
@@ -74,6 +77,8 @@ tex、verify 脚本、docs 描述同一套规则，任何语义修改一次改�
 3. 若改了流程图，节点/边与脚本状态机逐条对照；
 4. 若改了 `site/`，跑 `verify/网页阅读验证.py`（Chromium 与 WebKit，命令见
    `docs/移动端阅读核查.md`）。
+5. 若改了规则纸排版或二维码，跑 `verify/规则纸输出验证.py` 并更新 README 预览；
+   纯排版修改可用 `--compare-ref` 对照修改前提交，确认规则正文未变。
 
 第 1、2 项由 GitHub Actions（`.github/workflows/verify.yml`）在每次 push/PR 时自动
 兜底执行：ubuntu 上跑状态机验证，并用 poppler 检查已提交 PDF 的单页与 yMax 红线。
