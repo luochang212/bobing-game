@@ -1,0 +1,14 @@
+---
+import { ArrowUpRight } from 'lucide-astro';
+
+interface Props {
+  home?: string;
+}
+
+const { home = '#' } = Astro.props;
+---
+<footer class="site-footer shell">
+  <a class="brand" href={home}><span class="brand-die" aria-hidden="true">四</span><span>中秋博饼</span></a>
+  <p>祝大家中秋快乐，博个好彩头。</p>
+  <a href="https://github.com/luochang212/bobing-game">项目源码<ArrowUpRight aria-hidden="true" /></a>
+</footer>

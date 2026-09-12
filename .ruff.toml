@@ -1,0 +1,7 @@
+# Python 验证脚本的 lint 基线（ruff check scripts/，CI 与本地一致）。
+line-length = 100
+
+[lint]
+select = ["E4", "E7", "E9", "F"]
+# E701/E702 忽略：分号同行是本仓库的故意紧凑风格（classify 的一行一规则镜像规则表逐行）。
+ignore = ["E701", "E702"]

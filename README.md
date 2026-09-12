@@ -147,6 +147,7 @@ flowchart TD
 | [scripts/web_reading_check.py](scripts/web_reading_check.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
 | [docs/rule-audit.md](docs/rule-audit.md) | 资料来源、修订原因与验证记录 |
 | [docs/local-dev-and-verification.md](docs/local-dev-and-verification.md) | 编译、预览核查、网页开发与机器验证的运行手册 |
+| [docs/mobile-reading-check.md](docs/mobile-reading-check.md) | 网页阅读体验的核查记录与回归命令 |
 | [docs/assets/](docs/assets/) / [docs/preview.png](docs/preview.png) | README 头图与规则纸预览 |
 | [Makefile](Makefile) / [.latexmkrc](.latexmkrc) | 编译配置，中间产物按版本集中到 `build/<版本>/` |
 | [.github/workflows/](.github/workflows/) | 规则检查与网页部署 |
@@ -158,9 +159,10 @@ flowchart TD
 
 修改规则需同步完成：
 
-1. 修改 LaTeX 源稿，并同步状态机与受影响的验证剧本。
-2. 在 `docs/rule-audit.md` 记录修改原因；更新受影响的 README 流程图与网页举例。
-3. 运行 `make pdf` 和[完整验证](docs/local-dev-and-verification.md#机器验证)，确认 PDF 仍为 **1 页**，内容最低点 **yMax ≤ 806pt**，并抽查 PDF 中的新措辞。
+1. 修改对应源稿：桌内规则改 `versions/<名>/rules-paper.tex`，加赛规则改 `champion-final/rules-paper.tex`；共享段落（奖级表、状元表、异常处理）须同步所有含它的源稿。
+2. 同步验证脚本：桌内改 `scripts/state_machine.py`，加赛改 `scripts/champion_final.py`；网页文案改对应 `site-data.json`。
+3. 在 `docs/rule-audit.md` 记录修改原因；更新受影响的 README 流程图与网页举例。
+4. 运行 `make pdf`、`make pdf-final` 和[完整验证](docs/local-dev-and-verification.md#机器验证)，确认两份 PDF 均为 **1 页**、内容最低点 **yMax ≤ 806pt**，并抽查 PDF 中的新措辞。
 
 规则纸保持黑白灰阶与单页约束，新增内容前先看 [AGENTS.md](AGENTS.md) 的版面约定。
 

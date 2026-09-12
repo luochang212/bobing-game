@@ -125,18 +125,19 @@ tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐
 
 提交前完整跑一遍：
 
-1. `python3 scripts/state_machine.py` 全绿（归类唯一、tiered 20 剧本＋pooled 5 剧本、三组随机）；
-2. `python3 scripts/champion_final.py` 全绿（加赛 7 剧本、随机整局）；
-3. `python3 scripts/version_consistency.py` 全绿（同族整段、跨族共识块、状元等级表跨件、site-data 两档）；
-4. 两份交付 PDF 均 1 页、yMax ≤ 806；桌内 PDF 含当前版本 README 声明的特征句，
+1. `ruff check scripts/` 全绿（需 `pip install ruff`；配置见 `.ruff.toml`，CI 同步执行）；
+2. `python3 scripts/state_machine.py` 全绿（归类唯一、tiered 20 剧本＋pooled 5 剧本、三组随机）；
+3. `python3 scripts/champion_final.py` 全绿（加赛 7 剧本、随机整局）；
+4. `python3 scripts/version_consistency.py` 全绿（同族整段、跨族共识块、状元等级表跨件、site-data 两档）；
+5. 两份交付 PDF 均 1 页、yMax ≤ 806；桌内 PDF 含当前版本 README 声明的特征句，
    加赛纸 PDF 含其 README 声明的特征句；`pdftotext` 抽查确认新措辞已写入；
-5. 若改了流程图，节点/边与脚本状态机逐条对照；
-6. 若改了 `site/`，跑 `scripts/web_reading_check.py`（Chromium 与 WebKit，命令见
+6. 若改了流程图，节点/边与脚本状态机逐条对照；
+7. 若改了 `site/`，跑 `scripts/web_reading_check.py`（Chromium 与 WebKit，命令见
    `docs/mobile-reading-check.md`）。
-7. 若改了规则纸排版或二维码，跑 `scripts/paper_output_check.py` 并更新 README 预览；
+8. 若改了规则纸排版或二维码，跑 `scripts/paper_output_check.py` 并更新 README 预览；
    纯排版修改可用 `--compare-ref` 对照修改前提交，确认规则正文未变。
 
-第 1—4 项由 GitHub Actions（`.github/workflows/verify.yml`）在每次 push/PR 时自动
+第 1—5 项由 GitHub Actions（`.github/workflows/verify.yml`）在每次 push/PR 时自动
 兜底执行：ubuntu 上跑两个状态机与共享内容检查，并用 poppler 检查两份已提交 PDF 的
 单页、yMax 红线与特征句。PDF 编译因字体依赖不在 CI 内，仍以本机 `make pdf`
 （改共享段时用 `make pdf-all` 把所有源稿都编一遍）为准。

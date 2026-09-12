@@ -95,6 +95,8 @@ python3 scripts/champion_final.py
 python3 scripts/version_consistency.py
 ```
 
+脚本另以 ruff 做静态检查（`pip install ruff` 后运行 `ruff check scripts/`，配置见 `.ruff.toml`，CI 同步执行）。
+
 | 检查层级 | 覆盖内容 |
 | --- | --- |
 | 全枚举 | 46656 种骰面归类 |

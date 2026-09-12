@@ -1,0 +1,14 @@
+---
+import { Download } from 'lucide-astro';
+
+interface Props {
+  pdf: string;
+  label: string;
+}
+
+const { pdf, label } = Astro.props;
+---
+<header class="site-header shell">
+  <a href="#" class="brand" aria-label="中秋博饼，回到顶部"><span class="brand-die" aria-hidden="true">四</span><span>中秋博饼</span></a>
+  <a class="header-download" href={pdf} download>{label} <Download aria-hidden="true" /></a>
+</header>

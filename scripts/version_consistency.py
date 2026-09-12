@@ -13,7 +13,6 @@ prizes.items 只比对 (id, faces, condition)（stock 标签随奖品模型合�
 from pathlib import Path
 import json
 import re
-import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 START = '\\shead{一}'
@@ -40,16 +39,16 @@ JSON_FAMILY_KEYS = [   # 同族一致：随奖品模型措辞可能不同
 
 def shared_lines(tex):
     lines = tex.splitlines()
-    start = next(i for i, l in enumerate(lines) if l.startswith(START))
-    end = next(i for i, l in enumerate(lines) if l.startswith(END))
+    start = next(i for i, line in enumerate(lines) if line.startswith(START))
+    end = next(i for i, line in enumerate(lines) if line.startswith(END))
     return lines[start:end]
 
 
 def block_lines(lines, start_anchor, end_anchor):
-    start = next(i for i, l in enumerate(lines) if l.startswith(start_anchor))
+    start = next(i for i, line in enumerate(lines) if line.startswith(start_anchor))
     if end_anchor is None:
         return [lines[start]]
-    end = next(i for i, l in enumerate(lines) if l.startswith(end_anchor))
+    end = next(i for i, line in enumerate(lines) if line.startswith(end_anchor))
     return lines[start:end]
 
 
@@ -72,8 +71,8 @@ def normalize_json(path, value):
 def zhuangyuan_table(tex):
     r"""抽取状元等级表（\begin{tabularx} 起、表头含"状元等级"、至 \end{tabularx}）。"""
     lines = tex.splitlines()
-    for i, l in enumerate(lines):
-        if l.startswith('\\begin{tabularx}') and any(
+    for i, line in enumerate(lines):
+        if line.startswith('\\begin{tabularx}') and any(
                 '状元等级' in lines[j] for j in range(i + 1, min(i + 4, len(lines)))):
             end = next(j for j in range(i, len(lines)) if lines[j].startswith('\\end{tabularx}'))
             return lines[i:end + 1]
