@@ -1,14 +1,15 @@
 # AGENTS.md
 
-本仓库交付一套中秋活动用的 A4 黑白单页博饼规则纸，支持多版本。核心资产是各版本的
-LaTeX 源稿，PDF 由当前版本编译生成，Python 脚本对规则文字做机器验证，docs 记录每个
-决策的依据。规则内容定位是"本次活动统一版"（本场约定），不得表述为各地统一传统。
+本仓库交付一套中秋活动用的 A4 黑白单页博饼规则物料，支持多版本：**桌内规则纸**
+（按奖品模型分版本）与**状元王加赛纸**（独立一张，服务决赛桌）。PDF 由源稿编译
+生成，Python 脚本对规则文字做机器验证，docs 记录每个决策的依据。规则内容定位是
+"本次活动统一版"（本场约定），不得表述为各地统一传统。
 
 ## 版本模型
 
 - 仓库根的 `current` 是指针文件，内容一行版本名；`make pdf` 只编译它指向的版本，
-  `output/pdf/rules-paper.pdf` 是唯一交付 PDF，永远等于当前版本。网站构建时读同一
-  指针，只渲染当前版本（见 `site/`）。
+  `output/pdf/rules-paper.pdf` 是唯一桌内交付 PDF，永远等于当前版本。网站构建时读
+  同一指针，只渲染当前版本（见 `site/`）。
 - `versions/<名>/` 每个版本自含全部版本特有内容：
   - `rules-paper.tex`：完整独立原稿（不做宏模板、不 `\input` 共享文件）；
   - `README.md`：定位、依据链接，以及行首声明的元数据——**规则族**（同族
@@ -17,9 +18,17 @@ LaTeX 源稿，PDF 由当前版本编译生成，Python 脚本对规则文字做
     特征句与排除句共同保证 CI 的"指针与产物一致"检查在各版本之间无歧义
     （改了 `current` 忘重编译、或放错版本产物即红）；
   - `site-data.json`：讲解页全量文案（Astro 构建时按指针加载）。
+- `versions/` 下的版本都是**桌内规则纸**：只写桌内玩法，不出现状元王内容
+  （状元王是决赛桌的另一个游戏，由独立的加赛纸承载，见下）。
+- `champion-final/` 是**状元王加赛纸**，独立一张、不随指针变化：各桌状元同台
+  轮掷决胜的完整规则（参加座次、判定与封盘、无状元兜底、异常与奖品）。其状元
+  等级表与各桌版本第三节逐字一致，由 `scripts/version_consistency.py` 跨件比对；
+  停止条件已成文（挑战一轮站住封盘＋10 轮无状元比总和兜底），设计依据见
+  `docs/rule-audit.md`。
 - 各版本必须一致的共享内容由 `scripts/version_consistency.py` 兜底：同族
   整段（奖级表、状元表、异常与收尾、记录栏）、跨族共识块（第一、三节与
-  出碗叠骰行）、site-data 核心/流程键两档；改共享内容必须同步对应版本。
+  出碗叠骰行）、状元等级表跨件比对、site-data 核心/流程键两档；改共享内容
+  必须同步对应源稿。
 - 换版本 = 改 `current` → `make pdf` → 提交。新增版本 = 新建 `versions/<名>/`
   （tex、README 含特征句、site-data.json）→ `make pdf-all` 编译检查 → 全套验证。
 - 版本名只描述自己（如 `classic`＝标准 63 份、无全场环节），"当前用哪个"只由
@@ -29,17 +38,22 @@ LaTeX 源稿，PDF 由当前版本编译生成，Python 脚本对规则文字做
 
 - `current`：版本指针，一行版本名。
 - `versions/`：版本仓库（结构见上）。
-- `scripts/state_machine.py`：按规则纸文字逐条实现的状态机与验证（46656 种骰面
+- `scripts/state_machine.py`：按桌内规则纸文字逐条实现的状态机与验证（46656 种骰面
   全枚举归类、tiered 20 项＋pooled 5 项确定性剧本、随机整局模拟）。它镜像 tex
   的规则（`prize_model='tiered'|'pooled'` 两种奖品模型），改规则必须同步改。
-- `scripts/version_consistency.py`：各版本规则纸与网页数据共享内容一致性检查
-  （纯标准库，CI 兜底），按规则族分档比对。
+- `scripts/champion_final.py`：状元王加赛状态机与验证（领先挑战窗口与封盘、
+  无状元兜底、加掷一掷两用、同和再掷；确定性剧本＋随机整局）。镜像加赛纸规则，
+  改加赛规则必须同步改。
+- `scripts/version_consistency.py`：各源稿共享内容一致性检查（纯标准库，CI 兜底），
+  按规则族分档比对，状元等级表跨件比对。
 - `scripts/web_reading_check.py`：讲解页的浏览器回归检查（七种视口 × Chromium/WebKit、
   目录跳转、无脚本阅读），以当前版本 tex 为骰面基准；依赖 Playwright，运行方式见
   `docs/mobile-reading-check.md`。
 - `scripts/paper_output_check.py`：检查交付 PDF 单页与底部安全线，渲染三档清晰度并
   解码二维码，可更新 `docs/preview.png`；`--compare-ref` 可对照历史提交（含英文化前
   旧路径回退）；依赖与命令见 `docs/local-dev-and-verification.md`。
+- `champion-final/`：状元王加赛纸（源稿 `rules-paper.tex`＋README 含特征句），
+  编译产物为 `output/pdf/champion-final.pdf`。
 - `docs/rule-audit.md`：决策与证据的留痕——资料来源、每处修订的原因、已知规格空白。
   改规则必须同步补记。
 - `docs/mobile-reading-check.md`：网页阅读体验的核查记录与可重复检查命令。
@@ -56,14 +70,16 @@ LaTeX 源稿，PDF 由当前版本编译生成，Python 脚本对规则文字做
 ## 常用命令
 
 ```sh
-make pdf                        # 编译 current 指向的版本，产物复制到 output/pdf/
-make pdf-all                    # 编译全部版本供检查（只落 build/<版本>/，不动交付位）
-python3 scripts/state_machine.py          # 状态机验证，必须全部通过
-python3 scripts/version_consistency.py    # 各版本共享段落一致，必须全部通过
-mdls -name kMDItemNumberOfPages output/pdf/rules-paper.pdf   # 页数，必须 = 1
+make pdf                        # 编译 current 指向的版本，产物复制到 output/pdf/rules-paper.pdf
+make pdf-final                  # 编译状元王加赛纸，产物复制到 output/pdf/champion-final.pdf
+make pdf-all                    # 编译全部版本与加赛纸供检查（只落 build/，不动交付位）
+python3 scripts/state_machine.py          # 桌内状态机验证，必须全部通过
+python3 scripts/champion_final.py         # 加赛状态机验证，必须全部通过
+python3 scripts/version_consistency.py    # 共享内容一致，必须全部通过
+mdls -name kMDItemNumberOfPages output/pdf/rules-paper.pdf      # 页数，必须 = 1
 pdftotext -bbox output/pdf/rules-paper.pdf - \
   | grep -oE 'yMax="[0-9.]+"' | sort -t'"' -k2 -n | tail -1
-# yMax 为内容最低点；页高 841.89pt，下边距 1.25cm≈35.5pt，必须 ≤ 806（每个版本都要满足）
+# yMax 为内容最低点；页高 841.89pt，下边距 1.25cm≈35.5pt，必须 ≤ 806（两份 PDF 都要满足）
 ```
 
 编译依赖本机 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）；右上角二维码由
@@ -87,10 +103,12 @@ tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐
 
 ## 硬性约束
 
-- **PDF 输出位置协议**：仓库唯一交付 PDF 是 `output/pdf/rules-paper.pdf`，内容必须等于
-  `current` 指向的版本（CI 用特征句兜底）；编译一律走 `make pdf`（latexmk 中间产物只落
-  `build/<版本>/`）。禁止在仓库根目录直接运行 xelatex——根目录或 `output/` 之外出现
-  同名 PDF 即散落产物，直接删除，不入库、不 review。
+- **PDF 输出位置协议**：仓库交付两份 PDF——桌内纸 `output/pdf/rules-paper.pdf`
+  （内容必须等于 `current` 指向的版本，CI 用特征句兜底）与加赛纸
+  `output/pdf/champion-final.pdf`（内容必须与 `champion-final/` 源稿一致）；
+  编译一律走 `make pdf` / `make pdf-final`（latexmk 中间产物只落 `build/<名>/`）。
+  禁止在仓库根目录直接运行 xelatex——根目录或 `output/` 之外出现同名 PDF 即
+  散落产物，直接删除，不入库、不 review。
 - **单页**：任何版本改动后其 PDF 页数必须仍为 1。当前内容底部约 798pt，安全线
   806pt，余量仅约 8pt——新增整行文字必然溢出，先想清楚删什么或压哪里。
 - **黑白**：只用灰阶与黑底白字（黑底"4"表示红四，是黑白印刷对红色的替代），
@@ -104,27 +122,30 @@ tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐
 
 提交前完整跑一遍：
 
-1. `python3 scripts/state_machine.py` 全绿（归类唯一、20 剧本、两组各 10000 局）；
-2. `python3 scripts/version_consistency.py` 全绿（各版本共享段落一致）；
-3. 交付 PDF 仍 1 页、yMax ≤ 806，且包含当前版本 README 声明的特征句；
-   `pdftotext` 抽查确认新措辞已写入；
-4. 若改了流程图，节点/边与脚本状态机逐条对照；
-5. 若改了 `site/`，跑 `scripts/web_reading_check.py`（Chromium 与 WebKit，命令见
+1. `python3 scripts/state_machine.py` 全绿（归类唯一、tiered 20 剧本＋pooled 5 剧本、三组随机）；
+2. `python3 scripts/champion_final.py` 全绿（加赛 7 剧本、随机整局）；
+3. `python3 scripts/version_consistency.py` 全绿（同族整段、跨族共识块、状元等级表跨件、site-data 两档）；
+4. 两份交付 PDF 均 1 页、yMax ≤ 806；桌内 PDF 含当前版本 README 声明的特征句，
+   加赛纸 PDF 含其 README 声明的特征句；`pdftotext` 抽查确认新措辞已写入；
+5. 若改了流程图，节点/边与脚本状态机逐条对照；
+6. 若改了 `site/`，跑 `scripts/web_reading_check.py`（Chromium 与 WebKit，命令见
    `docs/mobile-reading-check.md`）。
-6. 若改了规则纸排版或二维码，跑 `scripts/paper_output_check.py` 并更新 README 预览；
+7. 若改了规则纸排版或二维码，跑 `scripts/paper_output_check.py` 并更新 README 预览；
    纯排版修改可用 `--compare-ref` 对照修改前提交，确认规则正文未变。
 
-第 1—3 项由 GitHub Actions（`.github/workflows/verify.yml`）在每次 push/PR 时自动
-兜底执行：ubuntu 上跑状态机与共享段检查，并用 poppler 检查已提交 PDF 的单页、
-yMax 红线与特征句。PDF 编译因字体依赖不在 CI 内，仍以本机 `make pdf`（改共享段时
-用 `make pdf-all` 把所有版本都编一遍）为准。
+第 1—4 项由 GitHub Actions（`.github/workflows/verify.yml`）在每次 push/PR 时自动
+兜底执行：ubuntu 上跑两个状态机与共享内容检查，并用 poppler 检查两份已提交 PDF 的
+单页、yMax 红线与特征句。PDF 编译因字体依赖不在 CI 内，仍以本机 `make pdf`
+（改共享段时用 `make pdf-all` 把所有源稿都编一遍）为准。
 
 ## 当前已知状态
 
-- 版本模型 2026-09-12 上线：现有 `classic`（标准 63 份）、`grand-final`（王中王）、
-  `flexible`（灵活奖品）三版；**当前指向以仓库根 `current` 文件为准**，本文档与
-  README 刻意不固定标注当前版本（README 版本表保持指针无关）。设计依据见
-  `docs/rule-audit.md`。
+- 版本模型 2026-09-12 上线，同日按"每张纸只服务自己那张桌子"完成剥离：桌内纸
+  回归纯桌内规则（`classic` 标准六十三份 / `flexible` 灵活奖品两版），状元王加赛
+  独立成纸 `champion-final/`（原带钩子的两版已删，git 历史可查）。
+- 状元王加赛停止条件已成文：领先成绩被其他每人各挑战一次而无人超越即封盘；
+  连续 10 轮无状元则每人加掷、一掷两用、比总和兜底。该规则与加赛纸、状态机
+  三方互为镜像；收敛依据与对赛事先例的偏离见 `docs/rule-audit.md`。
 - 比总和阶段遇真状元骰面的规格空白已收口：结束条款现为"有人掷出状元，就按第三节比较；
   都未掷出，就比六颗点数总和"，已写入 tex；脚本 `sum_phase_mode='proposed'` 对应
   现行条款，`'literal'` 保留为修订前对照。

@@ -12,10 +12,6 @@
 
 规则族：pooled（跨族只锁定共有的判定与状元段落，由 `scripts/version_consistency.py` 按族比对）
 特征句：奖品领到只剩状元奖
-排除句：博出的状元晋级全场
-
-特征句与排除句共同保证 CI 的"指针与产物一致"检查无歧义：本版与
-flexible-grand-final 只差底注钩子，须靠"不含晋级全场"区分。
 
 - **依据**：奖品模型的取舍与状态机扩展记录见 [docs/rule-audit.md](../../docs/rule-audit.md)
 - **切换**：把仓库根目录 `current` 文件改成本目录名，`make pdf` 重编译后提交；

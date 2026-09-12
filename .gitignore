@@ -21,3 +21,5 @@ site/.astro/
 
 # ZCode 本地工具产物
 .zcode/
+scripts/__pycache__/
+/champion-final.pdf

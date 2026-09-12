@@ -35,7 +35,7 @@
 
 ## 🚀 快速开始
 
-1. 下载 [博饼规则 PDF](output/pdf/rules-paper.pdf)，按 **A4 纵向、实际大小（100%）、黑白** 打印。
+1. 下载 [博饼规则 PDF](output/pdf/rules-paper.pdf)，按 **A4 纵向、实际大小（100%）、黑白** 打印。多桌活动要决出全场"状元王"时，另印一张[状元王加赛规则](output/pdf/champion-final.pdf)交给决赛桌即可——每桌规则纸不含状元王内容。
 2. 每桌准备以下物料，按六档摆好奖品。
 3. 指定首位玩家，由一位玩家兼任记录员。顺时针轮流掷骰，掷完传左手边。
 
@@ -111,14 +111,12 @@ flowchart TD
 
 ## 🧭 版本
 
-规则纸按活动场景分版本维护：仓库根的 `current` 指针决定 `make pdf` 编译哪个版本、网站渲染哪个版本，`output/pdf/rules-paper.pdf` 永远是当前版本。每个版本自含完整源稿（不做共享模板），各版本必须一致的规则段落由 CI 强制比对。
+规则纸按活动场景分版本维护：仓库根的 `current` 指针决定 `make pdf` 编译哪个版本、网站渲染哪个版本，`output/pdf/rules-paper.pdf` 永远是当前版本。每个版本自含完整源稿（不做共享模板），各版本必须一致的规则段落由 CI 强制比对。**状元王加赛是独立的一张纸**（[champion-final](champion-final/)），不属于任何版本——它只服务决赛桌，与奖品模型无关，一张通用于所有版本。
 
 | 版本 | 定位 |
 | --- | --- |
-| [classic](versions/classic/) | 标准 63 份：固定奖品六档，单桌多桌通用，无全场环节 |
-| [grand-final](versions/grand-final/) | 王中王：固定 63 份，各桌状元晋级全场“状元王”加赛 |
-| [flexible](versions/flexible/) | 灵活奖品：奖品若干、先留 1 份作状元奖，单桌多桌通用，无全场环节 |
-| [flexible-grand-final](versions/flexible-grand-final/) | 灵活奖品 · 王中王：奖品若干，各桌状元晋级全场“状元王”加赛 |
+| [classic](versions/classic/) | 标准 63 份：固定奖品六档，单桌多桌通用 |
+| [flexible](versions/flexible/) | 灵活奖品：奖品若干、先留 1 份作状元奖，单桌多桌通用 |
 
 当前编译与网站渲染哪个版本，由仓库根 `current` 指针决定（内容一行版本名），本表刻意不固定标注：切换只需把 `current` 改为目标版本、`make pdf` 后提交，网站随部署自动更新。新增版本的要求见 [AGENTS.md](AGENTS.md) 的版本模型。
 
@@ -126,9 +124,9 @@ flowchart TD
 
 直接使用规则纸可下载现成 PDF，无需准备开发环境。想自己动手时，各环节只需一条命令：
 
-- **编译规则纸**：仓库根目录运行 `make pdf`（编译 `current` 指向的版本），依赖 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）；`make pdf-all` 把全部版本各编一遍供检查。
+- **编译规则纸**：仓库根目录运行 `make pdf`（编译 `current` 指向的版本），依赖 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）；`make pdf-final` 编译状元王加赛纸，`make pdf-all` 把全部版本与加赛纸各编一遍供检查。
 - **启动讲解网页**：在 `site/` 目录运行 `npm install && npm run dev`，技术栈为 Astro + Tailwind。
-- **机器验证**：仓库根目录运行 `python3 scripts/state_machine.py` 与 `python3 scripts/version_consistency.py`，均仅依赖 Python 3 标准库。
+- **机器验证**：仓库根目录运行 `python3 scripts/state_machine.py`、`python3 scripts/champion_final.py` 与 `python3 scripts/version_consistency.py`，均仅依赖 Python 3 标准库。
 
 依赖安装、预览与二维码核查、构建部署等完整步骤，见 [docs/local-dev-and-verification.md](docs/local-dev-and-verification.md)。
 
@@ -137,11 +135,14 @@ flowchart TD
 | 路径 | 说明 |
 | --- | --- |
 | [current](current) | 版本指针，一行版本名；决定编译与网站渲染的版本 |
-| [versions/](versions/) | 版本仓库，每版自含源稿、说明（含特征句）与网页文案 |
-| [output/pdf/rules-paper.pdf](output/pdf/rules-paper.pdf) | 唯一交付 PDF，永远 = current 指向的版本，由 `make pdf` 生成 |
+| [versions/](versions/) | 桌内规则纸版本仓库，每版自含源稿、说明（含特征句）与网页文案 |
+| [champion-final/](champion-final/) | 状元王加赛纸：独立一张，服务决赛桌，与奖品模型无关 |
+| [output/pdf/rules-paper.pdf](output/pdf/rules-paper.pdf) | 唯一桌内交付 PDF，永远 = current 指向的版本，由 `make pdf` 生成 |
+| [output/pdf/champion-final.pdf](output/pdf/champion-final.pdf) | 状元王加赛纸交付 PDF，由 `make pdf-final` 生成 |
 | [site/](site/) | 讲解网页，构建时按指针渲染当前版本，含骰面示例与常见疑问 |
-| [scripts/state_machine.py](scripts/state_machine.py) | 规则状态机与验证脚本 |
-| [scripts/version_consistency.py](scripts/version_consistency.py) | 各版本规则纸共享段落一致性检查 |
+| [scripts/state_machine.py](scripts/state_machine.py) | 桌内规则状态机与验证脚本 |
+| [scripts/champion_final.py](scripts/champion_final.py) | 状元王加赛状态机与验证脚本（封盘、兜底、一掷两用） |
+| [scripts/version_consistency.py](scripts/version_consistency.py) | 各源稿共享内容一致性检查（含跨件状元等级表） |
 | [scripts/paper_output_check.py](scripts/paper_output_check.py) | PDF 单页、底部安全线、预览渲染与二维码解码核查 |
 | [scripts/web_reading_check.py](scripts/web_reading_check.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
 | [docs/rule-audit.md](docs/rule-audit.md) | 资料来源、修订原因与验证记录 |

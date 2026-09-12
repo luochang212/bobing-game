@@ -15,24 +15,28 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: 规则状态机验证
+      - name: 规则状态机验证（桌内）
         run: python3 scripts/state_machine.py
 
-      - name: 各版本共享段落一致
+      - name: 状元王加赛状态机验证
+        run: python3 scripts/champion_final.py
+
+      - name: 各版本共享内容一致
         run: python3 scripts/version_consistency.py
 
-      - name: 单页与版面约束（检查已提交的交付 PDF）
+      - name: 单页与版面约束（两份交付 PDF）
         run: |
           sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
-          PDF="output/pdf/rules-paper.pdf"
-          pages=$(pdfinfo "$PDF" | awk '/^Pages:/{print $2}')
-          echo "页数: $pages"
-          [ "$pages" = "1" ] || { echo "失败：交付 PDF 必须为 1 页"; exit 1; }
-          ymax=$(pdftotext -bbox "$PDF" - | grep -oE 'yMax="[0-9.]+"' | sort -t'"' -k2 -n | tail -1 | grep -oE '[0-9.]+')
-          echo "内容最低点 yMax: ${ymax} pt（安全线 806）"
-          awk -v y="$ymax" 'BEGIN{exit !(y <= 806)}' || { echo "失败：yMax 超出安全线 806"; exit 1; }
+          for PDF in output/pdf/rules-paper.pdf output/pdf/champion-final.pdf; do
+            pages=$(pdfinfo "$PDF" | awk '/^Pages:/{print $2}')
+            echo "$PDF 页数: $pages"
+            [ "$pages" = "1" ] || { echo "失败：$PDF 必须为 1 页"; exit 1; }
+            ymax=$(pdftotext -bbox "$PDF" - | grep -oE 'yMax="[0-9.]+"' | sort -t'"' -k2 -n | tail -1 | grep -oE '[0-9.]+')
+            echo "$PDF 内容最低点 yMax: ${ymax} pt（安全线 806）"
+            awk -v y="$ymax" 'BEGIN{exit !(y <= 806)}' || { echo "失败：$PDF yMax 超出安全线 806"; exit 1; }
+          done
 
-      - name: 指针与交付 PDF 一致（特征句/排除句抽查）
+      - name: 指针与桌内交付 PDF 一致（特征句/排除句抽查）
         run: |
           CURRENT=$(cat current)
           DIR="versions/$CURRENT"
@@ -49,4 +53,15 @@ jobs:
             echo "$TEXT" | grep -qF "$phrase" \
               && { echo "失败：交付 PDF 含版本 $CURRENT 的排除句「$phrase」，疑似其他版本的产物"; exit 1; }
           done < /tmp/excluded.txt
-          echo "交付 PDF 与指针一致：$CURRENT"
+          echo "桌内交付 PDF 与指针一致：$CURRENT"
+
+      - name: 加赛纸与源稿一致（特征句抽查）
+        run: |
+          TEXT=$(pdftotext "output/pdf/champion-final.pdf" - | tr -d '[:space:]')
+          sed -n 's/^特征句：//p' champion-final/README.md | sed 's/[[:space:]]//g' | grep -v '^$' > /tmp/final-features.txt
+          [ -s /tmp/final-features.txt ] || { echo "失败：champion-final/README.md 未声明特征句"; exit 1; }
+          while IFS= read -r phrase; do
+            echo "$TEXT" | grep -qF "$phrase" \
+              || { echo "失败：加赛纸 PDF 缺少特征句「$phrase」——改了源稿却没有重编译提交"; exit 1; }
+          done < /tmp/final-features.txt
+          echo "加赛纸 PDF 与源稿一致"

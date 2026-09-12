@@ -69,6 +69,17 @@ def normalize_json(path, value):
     return value
 
 
+def zhuangyuan_table(tex):
+    r"""抽取状元等级表（\begin{tabularx} 起、表头含"状元等级"、至 \end{tabularx}）。"""
+    lines = tex.splitlines()
+    for i, l in enumerate(lines):
+        if l.startswith('\\begin{tabularx}') and any(
+                '状元等级' in lines[j] for j in range(i + 1, min(i + 4, len(lines)))):
+            end = next(j for j in range(i, len(lines)) if lines[j].startswith('\\end{tabularx}'))
+            return lines[i:end + 1]
+    raise ValueError('未找到状元等级表')
+
+
 def family_of(version_dir):
     readme = version_dir / 'README.md'
     match = re.search(r'^规则族：([A-Za-z0-9_-]+)', readme.read_text(encoding='utf-8'), re.M) if readme.exists() else None
@@ -80,9 +91,12 @@ def main():
     papers = sorted((ROOT / 'versions').glob('*/rules-paper.tex'))
     families = {}
     sections = {}
+    raws = {}
     for p in papers:
         name = p.parent.name
-        sections[name] = shared_lines(p.read_text(encoding='utf-8'))
+        raw = p.read_text(encoding='utf-8')
+        raws[name] = raw
+        sections[name] = shared_lines(raw)
         families.setdefault(family_of(p.parent), []).append(name)
     names = sorted(sections)
 
@@ -127,6 +141,29 @@ def main():
             for who, ls in ((base, a), (name, b)):
                 if diff < len(ls):
                     print(f'  {who}: {ls[diff]}')
+
+    # 状元等级表：各桌内版本与加赛纸逐字一致（跨件共享内容）。
+    final_tex = ROOT / 'champion-final' / 'rules-paper.tex'
+    table_sources = {f'版本 {n}': raw for n, raw in raws.items()}
+    if final_tex.exists():
+        table_sources['加赛纸'] = final_tex.read_text(encoding='utf-8')
+    tables = {label: zhuangyuan_table(raw) for label, raw in table_sources.items()}
+    t_labels = sorted(tables)
+    if len(t_labels) >= 2:
+        base = t_labels[0]
+        clean = True
+        for label in t_labels[1:]:
+            if tables[label] == tables[base]:
+                continue
+            ok = False
+            clean = False
+            diff = next((i for i, (x, y) in enumerate(zip(tables[base], tables[label])) if x != y),
+                        min(len(tables[base]), len(tables[label])))
+            print(f'FAIL 状元等级表不一致：{base} vs {label}，自第 {diff + 1} 行起不同')
+        if clean:
+            print(f'PASS 状元等级表跨件一致：{len(t_labels)} 份源稿（{len(tables[base])} 行）')
+    else:
+        print('PASS 状元等级表跨件一致：暂无可比对对象')
 
     # site-data：核心键跨族比对，流程键同族比对。
     datas = {n: json.loads((ROOT / 'versions' / n / 'site-data.json').read_text(encoding='utf-8'))
