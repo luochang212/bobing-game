@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """博饼规则状态机验证脚本。
 
-验证对象：仓库根目录《博饼规则-A4黑白.tex》的规则文字。
+验证对象：仓库根目录《rules-paper.tex》的规则文字。
 方法：按规则纸文字逐条实现游戏状态机（掷骰分类 → 领奖/记名 →
 回合推进 → 三段式结束），做三层检查：
 
@@ -12,12 +12,12 @@
 3. 随机整局：字面规则与拟修订规则各 10000 局，验证终止性、
    库存守恒、领取恰 62 份、领先者单调。
 
-运行：python3 scripts/状态机验证.py
+运行：python3 scripts/state_machine.py
 依赖：仅 Python 3 标准库。
 
 说明：sum_phase_mode='proposed' 与规则纸现行结束条款一致（2026-09-11 落地，
 2026-09-12 修正为与纸面相同的"一掷两用"）；'literal' 保留为修订前的字面
-行为，仅作对照。详见 docs/规则核查.md。
+行为，仅作对照。详见 docs/rule-audit.md。
 """
 from itertools import product, chain, repeat
 from collections import Counter

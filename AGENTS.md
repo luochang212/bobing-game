@@ -6,19 +6,19 @@ PDF 由源稿编译生成，Python 脚本对规则文字做机器验证，docs �
 
 ## 文件职责
 
-- `博饼规则-A4黑白.tex`：规则纸唯一源稿，规则语义以它为准。
-- `output/pdf/博饼规则-A4黑白.pdf`：编译产物，只由 `make pdf` 生成，不要手改。
-- `scripts/状态机验证.py`：按规则纸文字逐条实现的状态机与验证（46656 种骰面
+- `rules-paper.tex`：规则纸唯一源稿，规则语义以它为准。
+- `output/pdf/rules-paper.pdf`：编译产物，只由 `make pdf` 生成，不要手改。
+- `scripts/state_machine.py`：按规则纸文字逐条实现的状态机与验证（46656 种骰面
   全枚举归类、20 项确定性剧本、随机整局模拟）。它镜像 tex 的规则，改规则必须同步改。
-- `scripts/网页阅读验证.py`：讲解页的浏览器回归检查（七种视口 × Chromium/WebKit、
-  目录跳转、无脚本阅读），依赖 Playwright，运行方式见 `docs/移动端阅读核查.md`。
-- `scripts/规则纸输出验证.py`：检查 PDF 单页与底部安全线，渲染三档清晰度并解码
-  二维码，可更新 `docs/preview.png`；依赖与命令见 `docs/本地开发与机器验证.md`。
-- `docs/规则核查.md`：决策与证据的留痕——资料来源、每处修订的原因、已知规格空白。
+- `scripts/web_reading_check.py`：讲解页的浏览器回归检查（七种视口 × Chromium/WebKit、
+  目录跳转、无脚本阅读），依赖 Playwright，运行方式见 `docs/mobile-reading-check.md`。
+- `scripts/paper_output_check.py`：检查 PDF 单页与底部安全线，渲染三档清晰度并解码
+  二维码，可更新 `docs/preview.png`；依赖与命令见 `docs/local-dev-and-verification.md`。
+- `docs/rule-audit.md`：决策与证据的留痕——资料来源、每处修订的原因、已知规格空白。
   改规则必须同步补记。
-- `docs/移动端阅读核查.md`：网页阅读体验的核查记录——两轮修订的判断依据与
+- `docs/mobile-reading-check.md`：网页阅读体验的核查记录——两轮修订的判断依据与
   可重复检查命令。
-- `docs/本地开发与机器验证.md`：编译规则纸、预览与二维码核查、讲解网页本地开发
+- `docs/local-dev-and-verification.md`：编译规则纸、预览与二维码核查、讲解网页本地开发
   与机器验证的运行手册；README 简述各环节并链接过去。
 - `README.md`：使用说明 + 游戏流程 mermaid 图（与脚本实现一一对应）。
 - `site/`：讲解版网页（Astro + Tailwind，部署到 GitHub Pages，workflow 为
@@ -31,9 +31,9 @@ PDF 由源稿编译生成，Python 脚本对规则文字做机器验证，docs �
 
 ```sh
 make pdf                        # 编译（latexmk + XeLaTeX），产物复制到 output/pdf/
-python3 scripts/状态机验证.py     # 状态机验证，必须全部通过
-mdls -name kMDItemNumberOfPages output/pdf/博饼规则-A4黑白.pdf   # 页数，必须 = 1
-pdftotext -bbox output/pdf/博饼规则-A4黑白.pdf - \
+python3 scripts/state_machine.py     # 状态机验证，必须全部通过
+mdls -name kMDItemNumberOfPages output/pdf/rules-paper.pdf   # 页数，必须 = 1
+pdftotext -bbox output/pdf/rules-paper.pdf - \
   | grep -oE 'yMax="[0-9.]+"' | sort -t'"' -k2 -n | tail -1
 # yMax 为内容最低点；页高 841.89pt，下边距 1.25cm≈35.5pt，必须 ≤ 806
 ```
@@ -51,14 +51,14 @@ MacTeX 自带的 `qrcode` 宏包直接生成，目标为 `https://www.luochang.i
 
 tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐：
 
-1. 改 `博饼规则-A4黑白.tex`；
-2. 同步修改 `scripts/状态机验证.py` 的 classify / 状态机（受影响的剧本一并改）；
-3. 在 `docs/规则核查.md` 增补修订记录（改了什么、依据是什么）；
+1. 改 `rules-paper.tex`；
+2. 同步修改 `scripts/state_machine.py` 的 classify / 状态机（受影响的剧本一并改）；
+3. 在 `docs/rule-audit.md` 增补修订记录（改了什么、依据是什么）；
 4. `make pdf` 重编译；README 的流程图若受影响同步更新。
 
 ## 硬性约束
 
-- **PDF 输出位置协议**：仓库唯一交付 PDF 是 `output/pdf/博饼规则-A4黑白.pdf`；编译一律走
+- **PDF 输出位置协议**：仓库唯一交付 PDF 是 `output/pdf/rules-paper.pdf`；编译一律走
   `make pdf`（latexmk 中间产物只落 `build/`）。禁止在仓库根目录直接运行 xelatex——根目录
   或 `output/` 之外出现同名 PDF 即散落产物，直接删除，不入库、不 review。
 - **单页**：任何改动后 PDF 页数必须仍为 1。当前内容底部约 798pt，安全线
@@ -74,12 +74,12 @@ tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐
 
 提交前完整跑一遍：
 
-1. `python3 scripts/状态机验证.py` 全绿（归类唯一、20 剧本、两组各 10000 局）；
+1. `python3 scripts/state_machine.py` 全绿（归类唯一、20 剧本、两组各 10000 局）；
 2. PDF 仍 1 页，yMax ≤ 806，`pdftotext` 抽查确认新措辞已写入；
 3. 若改了流程图，节点/边与脚本状态机逐条对照；
-4. 若改了 `site/`，跑 `scripts/网页阅读验证.py`（Chromium 与 WebKit，命令见
-   `docs/移动端阅读核查.md`）。
-5. 若改了规则纸排版或二维码，跑 `scripts/规则纸输出验证.py` 并更新 README 预览；
+4. 若改了 `site/`，跑 `scripts/web_reading_check.py`（Chromium 与 WebKit，命令见
+   `docs/mobile-reading-check.md`）。
+5. 若改了规则纸排版或二维码，跑 `scripts/paper_output_check.py` 并更新 README 预览；
    纯排版修改可用 `--compare-ref` 对照修改前提交，确认规则正文未变。
 
 第 1、2 项由 GitHub Actions（`.github/workflows/verify.yml`）在每次 push/PR 时自动

@@ -21,7 +21,7 @@
 make pdf
 ```
 
-依赖 macOS 字体 **Songti SC / Hiragino Sans GB**。编译中间产物集中在 `build/`，最终 PDF 输出到 [`output/pdf/博饼规则-A4黑白.pdf`](../output/pdf/博饼规则-A4黑白.pdf)。
+依赖 macOS 字体 **Songti SC / Hiragino Sans GB**。编译中间产物集中在 `build/`，最终 PDF 输出到 [`output/pdf/rules-paper.pdf`](../output/pdf/rules-paper.pdf)。
 
 <details>
 <summary>找不到 TeX 命令？</summary>
@@ -39,7 +39,7 @@ make pdf
 
 ### 生成预览与核查二维码
 
-二维码地址直接写在 TeX 的 `\qrcode` 命令中，由 MacTeX 自带宏包生成矢量图。改地址后运行 `make pdf`，再用[输出验证脚本](../scripts/规则纸输出验证.py)检查并更新预览。
+二维码地址直接写在 TeX 的 `\qrcode` 命令中，由 MacTeX 自带宏包生成矢量图。改地址后运行 `make pdf`，再用[输出验证脚本](../scripts/paper_output_check.py)检查并更新预览。
 
 首次准备核查环境：
 
@@ -52,7 +52,7 @@ tmp/pdf-tools/bin/pip install pillow zxing-cpp
 每次编译后运行：
 
 ```sh
-tmp/pdf-tools/bin/python scripts/规则纸输出验证.py --preview-output docs/preview.png
+tmp/pdf-tools/bin/python scripts/paper_output_check.py --preview-output docs/preview.png
 ```
 
 脚本检查单页与 806pt 底部安全线，在 `tmp/pdf-review/` 生成提取文字及 100、150、300 DPI 图片，并逐张解码二维码，核对目标地址。全部通过后才更新 README 预览。纯排版修改时可附加 `--compare-ref <提交号>`，对照该版本的规则正文；更换网址时同时传入 `--url <新地址>`。核查依赖不参与 PDF 编译。
@@ -75,7 +75,7 @@ npm run preview
 产物位于 `site/dist/`。[部署工作流](../.github/workflows/site.yml) 配置为在 `main` 分支的 `site/**` 或工作流文件变化时部署到 GitHub Pages，也支持手动触发，线上地址为 [www.luochang.ink/bobing-game](https://www.luochang.ink/bobing-game/)。部署时会将规则纸复制为 `rules-paper.pdf`；本地预览构建产物时，如需使用页面上的 PDF 下载入口，可先在 `site/` 目录执行：
 
 ```sh
-cp ../output/pdf/博饼规则-A4黑白.pdf dist/rules-paper.pdf
+cp ../output/pdf/rules-paper.pdf dist/rules-paper.pdf
 ```
 
 ## 机器验证
@@ -83,7 +83,7 @@ cp ../output/pdf/博饼规则-A4黑白.pdf dist/rules-paper.pdf
 在仓库根目录运行：
 
 ```sh
-python3 scripts/状态机验证.py
+python3 scripts/state_machine.py
 ```
 
 | 检查层级 | 覆盖内容 |
@@ -108,4 +108,4 @@ python3 scripts/状态机验证.py
 
 [验证工作流](../.github/workflows/verify.yml) 在推送到 `main` 和提交 PR 时运行状态机检查，并用 Poppler 检查已提交 PDF 的单页与版面红线。PDF 编译依赖本机字体，仍需在本机完成。
 
-手机阅读体验另有[核查记录与浏览器回归检查](移动端阅读核查.md)，覆盖首屏玩法、规则字号、目录跳转与无脚本阅读。
+手机阅读体验另有[核查记录与浏览器回归检查](mobile-reading-check.md)，覆盖首屏玩法、规则字号、目录跳转与无脚本阅读。

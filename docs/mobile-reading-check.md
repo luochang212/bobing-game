@@ -77,7 +77,7 @@
 
 本轮 Chrome 与 WebKit 两个引擎的七种视口检查均通过，生产构建、原有完整状态机验证及 PDF 单页检查也通过。目录采用即时跳转，不引入滚动动画；“跳到正文”的键盘入口同样预留常驻目录的高度。
 
-回归脚本：[网页阅读验证.py](../scripts/网页阅读验证.py)。Playwright 仅为本地验证依赖，不进入网站运行依赖。
+回归脚本：[web_reading_check.py](../scripts/web_reading_check.py)。Playwright 仅为本地验证依赖，不进入网站运行依赖。
 
 先在仓库根目录准备浏览器环境：
 
@@ -92,15 +92,15 @@ python3 -m venv tmp/reading-check
 ```sh
 cd site
 npm run build
-cp ../output/pdf/博饼规则-A4黑白.pdf dist/rules-paper.pdf
+cp ../output/pdf/rules-paper.pdf dist/rules-paper.pdf
 npm run preview -- --host 127.0.0.1 --port 4322
 ```
 
 再从仓库根目录运行：
 
 ```sh
-./tmp/reading-check/bin/python scripts/网页阅读验证.py
-./tmp/reading-check/bin/python scripts/网页阅读验证.py --browser webkit
+./tmp/reading-check/bin/python scripts/web_reading_check.py
+./tmp/reading-check/bin/python scripts/web_reading_check.py --browser webkit
 ```
 
 使用已安装的 Chrome 可将第一条检查改为 `--channel chrome`。其他预览地址用 `--url` 指定，地址需以 `/` 结尾。

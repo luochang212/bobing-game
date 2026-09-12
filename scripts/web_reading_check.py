@@ -1,4 +1,4 @@
-"""现场读规则的浏览器回归检查；依赖 Playwright，运行方式见 docs/移动端阅读核查.md。"""
+"""现场读规则的浏览器回归检查；依赖 Playwright，运行方式见 docs/mobile-reading-check.md。"""
 import argparse
 import json
 import re
@@ -11,7 +11,7 @@ parser.add_argument('--browser', choices=['chromium', 'webkit'], default='chromi
 parser.add_argument('--channel', help='使用本机 Chrome 时传 chrome，仅限 Chromium')
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
-tex = (root / '博饼规则-A4黑白.tex').read_text()
+tex = (root / 'rules-paper.tex').read_text()
 source_rolls = {tuple(re.findall(r'\d', group)) for group in re.findall(r'\\roll((?:\{\d\}){6})', tex)}
 source_rolls.update(tuple(re.findall(r'\d', group)) for group in re.findall(r'[1-6](?:、[1-6]){5}', tex))
 

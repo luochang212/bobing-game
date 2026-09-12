@@ -15,7 +15,18 @@ import zxingcpp
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PDF_PATH = 'output/pdf/博饼规则-A4黑白.pdf'
+PDF_PATH = 'output/pdf/rules-paper.pdf'
+# 2026-09 文件名英文化前的旧交付路径；--compare-ref 对照历史提交时回退使用。
+LEGACY_PDF_PATH = 'output/pdf/博饼规则-A4黑白.pdf'
+
+
+def git_show_pdf(ref):
+    for path in (PDF_PATH, LEGACY_PDF_PATH):
+        result = subprocess.run(['git', 'show', f'{ref}:{path}'], cwd=ROOT,
+                                capture_output=True)
+        if result.returncode == 0:
+            return result.stdout
+    raise ValueError(f'{ref} 中既无 {PDF_PATH} 也无旧路径 {LEGACY_PDF_PATH}')
 
 
 def pdf_text(pdf):
@@ -64,8 +75,7 @@ def main():
         print(f'PASS {dpi} DPI 整页二维码：{decoded[0]}')
 
     if args.compare_ref:
-        before = subprocess.check_output(
-            ['git', 'show', f'{args.compare_ref}:{PDF_PATH}'], cwd=ROOT)
+        before = git_show_pdf(args.compare_ref)
         before_text = subprocess.check_output(
             ['pdftotext', '-layout', '-', '-'], input=before).decode('utf-8')
         # 忽略排版换行、章节序号顿号和新增的扫码标签，保留规则文字与数字。

@@ -32,7 +32,7 @@ jobs:
       - run: npm run build
         working-directory: site
       - name: 附上规则纸 PDF
-        run: cp output/pdf/博饼规则-A4黑白.pdf site/dist/rules-paper.pdf
+        run: cp output/pdf/rules-paper.pdf site/dist/rules-paper.pdf
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

@@ -7,13 +7,13 @@
   <a href="https://github.com/luochang212/bobing-game/stargazers"><img src="https://img.shields.io/github/stars/luochang212/bobing-game?style=flat-square&logo=github&color=545759" alt="GitHub 星标数"></a>
   <a href="https://github.com/luochang212/bobing-game/forks"><img src="https://img.shields.io/github/forks/luochang212/bobing-game?style=flat-square&logo=github&color=545759" alt="GitHub 分支数"></a>
   <a href="https://github.com/luochang212/bobing-game/actions/workflows/verify.yml"><img src="https://github.com/luochang212/bobing-game/actions/workflows/verify.yml/badge.svg" alt="规则验证"></a>
-  <a href="output/pdf/博饼规则-A4黑白.pdf"><img src="https://img.shields.io/badge/PDF-A4%20%C2%B7%20%E5%8D%95%E9%A1%B5%20%C2%B7%20%E9%BB%91%E7%99%BD-545759?style=flat-square" alt="A4 单页黑白 PDF"></a>
+  <a href="output/pdf/rules-paper.pdf"><img src="https://img.shields.io/badge/PDF-A4%20%C2%B7%20%E5%8D%95%E9%A1%B5%20%C2%B7%20%E9%BB%91%E7%99%BD-545759?style=flat-square" alt="A4 单页黑白 PDF"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-545759?style=flat-square" alt="MIT 开源协议"></a>
 </div>
 
 <div align="center">
   <p><em>一张规则纸，开一桌中秋博饼。</em></p>
-  <p><a href="https://www.luochang.ink/bobing-game/">🌐 在线讲解页</a> · <a href="output/pdf/博饼规则-A4黑白.pdf">📄 规则 PDF</a> · <a href="#快速开始">快速开始</a> · <a href="#本地开发">本地开发</a></p>
+  <p><a href="https://www.luochang.ink/bobing-game/">🌐 在线讲解页</a> · <a href="output/pdf/rules-paper.pdf">📄 规则 PDF</a> · <a href="#快速开始">快速开始</a> · <a href="#本地开发">本地开发</a></p>
 </div>
 
 ---
@@ -35,7 +35,7 @@
 
 ## 🚀 快速开始
 
-1. 下载 [博饼规则 PDF](output/pdf/博饼规则-A4黑白.pdf)，按 **A4 纵向、实际大小（100%）、黑白** 打印。
+1. 下载 [博饼规则 PDF](output/pdf/rules-paper.pdf)，按 **A4 纵向、实际大小（100%）、黑白** 打印。
 2. 每桌准备以下物料，按六档摆好奖品。
 3. 指定首位玩家，由一位玩家兼任记录员。顺时针轮流掷骰，掷完传左手边。
 
@@ -51,7 +51,7 @@
 <details>
   <summary>📄 展开查看规则纸预览</summary>
   <p align="center">
-    <a href="output/pdf/博饼规则-A4黑白.pdf"><img src="./docs/preview.png" alt="中秋博饼 A4 黑白规则纸预览，点击打开 PDF" width="68%"></a>
+    <a href="output/pdf/rules-paper.pdf"><img src="./docs/preview.png" alt="中秋博饼 A4 黑白规则纸预览，点击打开 PDF" width="68%"></a>
   </p>
 </details>
 
@@ -70,7 +70,7 @@
 
 **领奖约定**：不兼奖、不降档、不通吃。所掷奖级发完就空过，不改领其他奖；普通奖不追回。掷中状元只记名次、不领普通奖，状元奖在结束时颁给领先者。
 
-**状元排序**：插金花 > 六红 > 六同（非四点，含六个 1，彼此同级）> 五红 > 五子登科 > 四红。五红与五子只比剩余 1 颗，四红比另 2 颗之和。先比等级、再比点数，大者领先，相同则先得者保留，每人只记最好成绩。具体骰面见 [规则纸第三节](output/pdf/博饼规则-A4黑白.pdf)。
+**状元排序**：插金花 > 六红 > 六同（非四点，含六个 1，彼此同级）> 五红 > 五子登科 > 四红。五红与五子只比剩余 1 颗，四红比另 2 颗之和。先比等级、再比点数，大者领先，相同则先得者保留，每人只记最好成绩。具体骰面见 [规则纸第三节](output/pdf/rules-paper.pdf)。
 
 **掷骰提醒**：任何一颗出碗，这一掷不计，换下一位。全部在碗内但叠骰、斜立无法判读时，由同桌确认后，六颗全部重掷。
 
@@ -113,22 +113,22 @@ flowchart TD
 
 - **编译规则纸**：仓库根目录运行 `make pdf`，依赖 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）。
 - **启动讲解网页**：在 `site/` 目录运行 `npm install && npm run dev`，技术栈为 Astro + Tailwind。
-- **机器验证**：仓库根目录运行 `python3 scripts/状态机验证.py`，仅依赖 Python 3 标准库。
+- **机器验证**：仓库根目录运行 `python3 scripts/state_machine.py`，仅依赖 Python 3 标准库。
 
-依赖安装、预览与二维码核查、构建部署等完整步骤，见 [docs/本地开发与机器验证.md](docs/本地开发与机器验证.md)。
+依赖安装、预览与二维码核查、构建部署等完整步骤，见 [docs/local-dev-and-verification.md](docs/local-dev-and-verification.md)。
 
 ## 📂 项目结构
 
 | 路径 | 说明 |
 | --- | --- |
-| [博饼规则-A4黑白.tex](博饼规则-A4黑白.tex) | 规则纸唯一源稿，规则语义以它为准 |
-| [output/pdf/博饼规则-A4黑白.pdf](output/pdf/博饼规则-A4黑白.pdf) | 唯一交付 PDF，由 `make pdf` 生成 |
+| [rules-paper.tex](rules-paper.tex) | 规则纸唯一源稿，规则语义以它为准 |
+| [output/pdf/rules-paper.pdf](output/pdf/rules-paper.pdf) | 唯一交付 PDF，由 `make pdf` 生成 |
 | [site/](site/) | 讲解网页，含骰面示例与常见疑问 |
-| [scripts/状态机验证.py](scripts/状态机验证.py) | 规则状态机与验证脚本 |
-| [scripts/规则纸输出验证.py](scripts/规则纸输出验证.py) | PDF 单页、底部安全线、预览渲染与二维码解码核查 |
-| [scripts/网页阅读验证.py](scripts/网页阅读验证.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
-| [docs/规则核查.md](docs/规则核查.md) | 资料来源、修订原因与验证记录 |
-| [docs/本地开发与机器验证.md](docs/本地开发与机器验证.md) | 编译、预览核查、网页开发与机器验证的运行手册 |
+| [scripts/state_machine.py](scripts/state_machine.py) | 规则状态机与验证脚本 |
+| [scripts/paper_output_check.py](scripts/paper_output_check.py) | PDF 单页、底部安全线、预览渲染与二维码解码核查 |
+| [scripts/web_reading_check.py](scripts/web_reading_check.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
+| [docs/rule-audit.md](docs/rule-audit.md) | 资料来源、修订原因与验证记录 |
+| [docs/local-dev-and-verification.md](docs/local-dev-and-verification.md) | 编译、预览核查、网页开发与机器验证的运行手册 |
 | [docs/assets/](docs/assets/) / [docs/preview.png](docs/preview.png) | README 头图与规则纸预览 |
 | [Makefile](Makefile) / [.latexmkrc](.latexmkrc) | 编译配置，中间产物集中到 `build/` |
 | [.github/workflows/](.github/workflows/) | 规则检查与网页部署 |
@@ -141,8 +141,8 @@ flowchart TD
 修改规则需同步完成：
 
 1. 修改 LaTeX 源稿，并同步状态机与受影响的验证剧本。
-2. 在 `docs/规则核查.md` 记录修改原因；更新受影响的 README 流程图与网页举例。
-3. 运行 `make pdf` 和[完整验证](docs/本地开发与机器验证.md#机器验证)，确认 PDF 仍为 **1 页**，内容最低点 **yMax ≤ 806pt**，并抽查 PDF 中的新措辞。
+2. 在 `docs/rule-audit.md` 记录修改原因；更新受影响的 README 流程图与网页举例。
+3. 运行 `make pdf` 和[完整验证](docs/local-dev-and-verification.md#机器验证)，确认 PDF 仍为 **1 页**，内容最低点 **yMax ≤ 806pt**，并抽查 PDF 中的新措辞。
 
 规则纸保持黑白灰阶与单页约束，新增内容前先看 [AGENTS.md](AGENTS.md) 的版面约定。
 
