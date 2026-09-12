@@ -1,41 +1,63 @@
 # AGENTS.md
 
-本仓库交付一张中秋活动用的 A4 黑白单页博饼规则纸。核心资产是 LaTeX 源稿，
-PDF 由源稿编译生成，Python 脚本对规则文字做机器验证，docs 记录每个决策的依据。
-规则内容定位是"本次活动统一版"（本场约定），不得表述为各地统一传统。
+本仓库交付一套中秋活动用的 A4 黑白单页博饼规则纸，支持多版本。核心资产是各版本的
+LaTeX 源稿，PDF 由当前版本编译生成，Python 脚本对规则文字做机器验证，docs 记录每个
+决策的依据。规则内容定位是"本次活动统一版"（本场约定），不得表述为各地统一传统。
+
+## 版本模型
+
+- 仓库根的 `current` 是指针文件，内容一行版本名；`make pdf` 只编译它指向的版本，
+  `output/pdf/rules-paper.pdf` 是唯一交付 PDF，永远等于当前版本。网站构建时读同一
+  指针，只渲染当前版本（见 `site/`）。
+- `versions/<名>/` 每个版本自含全部版本特有内容：
+  - `rules-paper.tex`：完整独立原稿（不做宏模板、不 `\input` 共享文件）；
+  - `README.md`：定位、依据链接，以及**特征句**——本版 PDF 有而他版没有的一句话，
+    供 CI 校验"指针与产物一致"（改了 `current` 忘重编译即红）；
+  - `site-data.json`：讲解页全量文案（Astro 构建时按指针加载）。
+- 各版本必须一致的共享段落（奖级表、状元表、异常与收尾、记录栏）由
+  `scripts/version_consistency.py` 两两比对兜底；改共享段必须所有版本同步。
+- 换版本 = 改 `current` → `make pdf` → 提交。新增版本 = 新建 `versions/<名>/`
+  （tex、README 含特征句、site-data.json）→ `make pdf-all` 编译检查 → 全套验证。
+- 版本名只描述自己（如 `classic`＝标准 63 份、无全场环节），"当前用哪个"只由
+  `current` 表达；文件名一律英文，文件内容保持中文。
 
 ## 文件职责
 
-- `rules-paper.tex`：规则纸唯一源稿，规则语义以它为准。
-- `output/pdf/rules-paper.pdf`：编译产物，只由 `make pdf` 生成，不要手改。
+- `current`：版本指针，一行版本名。
+- `versions/`：版本仓库（结构见上）。
 - `scripts/state_machine.py`：按规则纸文字逐条实现的状态机与验证（46656 种骰面
   全枚举归类、20 项确定性剧本、随机整局模拟）。它镜像 tex 的规则，改规则必须同步改。
+- `scripts/version_consistency.py`：各版本规则纸共享段落一致性检查（纯标准库，CI 兜底）。
 - `scripts/web_reading_check.py`：讲解页的浏览器回归检查（七种视口 × Chromium/WebKit、
-  目录跳转、无脚本阅读），依赖 Playwright，运行方式见 `docs/mobile-reading-check.md`。
-- `scripts/paper_output_check.py`：检查 PDF 单页与底部安全线，渲染三档清晰度并解码
-  二维码，可更新 `docs/preview.png`；依赖与命令见 `docs/local-dev-and-verification.md`。
+  目录跳转、无脚本阅读），以当前版本 tex 为骰面基准；依赖 Playwright，运行方式见
+  `docs/mobile-reading-check.md`。
+- `scripts/paper_output_check.py`：检查交付 PDF 单页与底部安全线，渲染三档清晰度并
+  解码二维码，可更新 `docs/preview.png`；`--compare-ref` 可对照历史提交（含英文化前
+  旧路径回退）；依赖与命令见 `docs/local-dev-and-verification.md`。
 - `docs/rule-audit.md`：决策与证据的留痕——资料来源、每处修订的原因、已知规格空白。
   改规则必须同步补记。
-- `docs/mobile-reading-check.md`：网页阅读体验的核查记录——两轮修订的判断依据与
-  可重复检查命令。
-- `docs/local-dev-and-verification.md`：编译规则纸、预览与二维码核查、讲解网页本地开发
-  与机器验证的运行手册；README 简述各环节并链接过去。
-- `README.md`：使用说明 + 游戏流程 mermaid 图（与脚本实现一一对应）。
+- `docs/mobile-reading-check.md`：网页阅读体验的核查记录与可重复检查命令。
+- `docs/local-dev-and-verification.md`：编译、预览与二维码核查、网页开发与机器验证
+  的运行手册；README 简述各环节并链接过去。
+- `README.md`：使用说明 + 版本表（仓库内的版本列表）+ 游戏流程 mermaid 图。
 - `site/`：讲解版网页（Astro + Tailwind，部署到 GitHub Pages，workflow 为
-  `.github/workflows/site.yml`）。定位是"解释与举例"，不是第二份规则权威源：
-  页面措辞逐句对齐 tex，页头注明"以现场纸质规则为准"；改规则若影响页面
-  举例，同步更新。
-- `build/`：编译中间产物。
+  `.github/workflows/site.yml`）。构建时读 `current`、加载当前版本的
+  `site-data.json` 渲染，不设多版本路由。定位是"解释与举例"，不是第二份规则权威源：
+  页面措辞逐句对齐 tex，页头注明"以现场纸质规则为准"；改规则若影响页面举例，
+  同步更新对应版本的 site-data.json。
+- `build/`：编译中间产物，按版本分目录。
 
 ## 常用命令
 
 ```sh
-make pdf                        # 编译（latexmk + XeLaTeX），产物复制到 output/pdf/
-python3 scripts/state_machine.py     # 状态机验证，必须全部通过
+make pdf                        # 编译 current 指向的版本，产物复制到 output/pdf/
+make pdf-all                    # 编译全部版本供检查（只落 build/<版本>/，不动交付位）
+python3 scripts/state_machine.py          # 状态机验证，必须全部通过
+python3 scripts/version_consistency.py    # 各版本共享段落一致，必须全部通过
 mdls -name kMDItemNumberOfPages output/pdf/rules-paper.pdf   # 页数，必须 = 1
 pdftotext -bbox output/pdf/rules-paper.pdf - \
   | grep -oE 'yMax="[0-9.]+"' | sort -t'"' -k2 -n | tail -1
-# yMax 为内容最低点；页高 841.89pt，下边距 1.25cm≈35.5pt，必须 ≤ 806
+# yMax 为内容最低点；页高 841.89pt，下边距 1.25cm≈35.5pt，必须 ≤ 806（每个版本都要满足）
 ```
 
 编译依赖本机 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）；右上角二维码由
@@ -44,24 +66,26 @@ MacTeX 自带的 `qrcode` 宏包直接生成，目标为 `https://www.luochang.i
 换字体或宏包会使非 macOS 环境无法编译，需慎重。
 
 讲解页（site/）：`cd site && npm install && npm run dev` 本地开发，
-`npm run build` 产物在 `site/dist/`；部署由 Actions 自动完成（仅 `site/**`
-变化时触发），规则纸 PDF 由 CI 在部署时复制为 `rules-paper.pdf`。
+`npm run build` 产物在 `site/dist/`；部署由 Actions 自动完成（`site/**`、
+`versions/**` 或 `current` 变化时触发），规则纸 PDF 由 CI 在部署时复制为
+`rules-paper.pdf`。
 
-## 改规则的"三件套"同步
+## 改规则的"四件套"同步
 
 tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐：
 
-1. 改 `rules-paper.tex`；
+1. 改受影响版本的 `versions/<名>/rules-paper.tex`；共享段改动必须同步**所有版本**；
 2. 同步修改 `scripts/state_machine.py` 的 classify / 状态机（受影响的剧本一并改）；
 3. 在 `docs/rule-audit.md` 增补修订记录（改了什么、依据是什么）；
-4. `make pdf` 重编译；README 的流程图若受影响同步更新。
+4. `make pdf` 重编译；README 的流程图与受影响版本的 site-data.json 一并更新。
 
 ## 硬性约束
 
-- **PDF 输出位置协议**：仓库唯一交付 PDF 是 `output/pdf/rules-paper.pdf`；编译一律走
-  `make pdf`（latexmk 中间产物只落 `build/`）。禁止在仓库根目录直接运行 xelatex——根目录
-  或 `output/` 之外出现同名 PDF 即散落产物，直接删除，不入库、不 review。
-- **单页**：任何改动后 PDF 页数必须仍为 1。当前内容底部约 798pt，安全线
+- **PDF 输出位置协议**：仓库唯一交付 PDF 是 `output/pdf/rules-paper.pdf`，内容必须等于
+  `current` 指向的版本（CI 用特征句兜底）；编译一律走 `make pdf`（latexmk 中间产物只落
+  `build/<版本>/`）。禁止在仓库根目录直接运行 xelatex——根目录或 `output/` 之外出现
+  同名 PDF 即散落产物，直接删除，不入库、不 review。
+- **单页**：任何版本改动后其 PDF 页数必须仍为 1。当前内容底部约 798pt，安全线
   806pt，余量仅约 8pt——新增整行文字必然溢出，先想清楚删什么或压哪里。
 - **黑白**：只用灰阶与黑底白字（黑底"4"表示红四，是黑白印刷对红色的替代），
   不得引入彩色。
@@ -75,19 +99,25 @@ tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐
 提交前完整跑一遍：
 
 1. `python3 scripts/state_machine.py` 全绿（归类唯一、20 剧本、两组各 10000 局）；
-2. PDF 仍 1 页，yMax ≤ 806，`pdftotext` 抽查确认新措辞已写入；
-3. 若改了流程图，节点/边与脚本状态机逐条对照；
-4. 若改了 `site/`，跑 `scripts/web_reading_check.py`（Chromium 与 WebKit，命令见
+2. `python3 scripts/version_consistency.py` 全绿（各版本共享段落一致）；
+3. 交付 PDF 仍 1 页、yMax ≤ 806，且包含当前版本 README 声明的特征句；
+   `pdftotext` 抽查确认新措辞已写入；
+4. 若改了流程图，节点/边与脚本状态机逐条对照；
+5. 若改了 `site/`，跑 `scripts/web_reading_check.py`（Chromium 与 WebKit，命令见
    `docs/mobile-reading-check.md`）。
-5. 若改了规则纸排版或二维码，跑 `scripts/paper_output_check.py` 并更新 README 预览；
+6. 若改了规则纸排版或二维码，跑 `scripts/paper_output_check.py` 并更新 README 预览；
    纯排版修改可用 `--compare-ref` 对照修改前提交，确认规则正文未变。
 
-第 1、2 项由 GitHub Actions（`.github/workflows/verify.yml`）在每次 push/PR 时自动
-兜底执行：ubuntu 上跑状态机验证，并用 poppler 检查已提交 PDF 的单页与 yMax 红线。
-PDF 编译因字体依赖不在 CI 内，仍以本机 `make pdf` 为准。
+第 1—3 项由 GitHub Actions（`.github/workflows/verify.yml`）在每次 push/PR 时自动
+兜底执行：ubuntu 上跑状态机与共享段检查，并用 poppler 检查已提交 PDF 的单页、
+yMax 红线与特征句。PDF 编译因字体依赖不在 CI 内，仍以本机 `make pdf`（改共享段时
+用 `make pdf-all` 把所有版本都编一遍）为准。
 
 ## 当前已知状态
 
+- 版本模型 2026-09-12 上线：当前版本 `classic`（标准 63 份、无全场环节）；
+  `grand-final`（各桌状元晋级全场加赛）与 site 按版本渲染在紧随的提交中完成，
+  设计依据见 `docs/rule-audit.md`。
 - 比总和阶段遇真状元骰面的规格空白已收口：结束条款现为"有人掷出状元，就按第三节比较；
   都未掷出，就比六颗点数总和"，已写入 tex；脚本 `sum_phase_mode='proposed'` 对应
   现行条款，`'literal'` 保留为修订前对照。

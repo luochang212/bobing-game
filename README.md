@@ -107,13 +107,23 @@ flowchart TD
 
 <a id="本地开发"></a>
 
+## 🧭 版本
+
+规则纸按活动场景分版本维护：仓库根的 `current` 指针决定 `make pdf` 编译哪个版本、网站渲染哪个版本，`output/pdf/rules-paper.pdf` 永远是当前版本。每个版本自含完整源稿（不做共享模板），各版本必须一致的规则段落由 CI 强制比对。
+
+| 版本 | 定位 | 状态 |
+| --- | --- | --- |
+| [classic](versions/classic/) | 标准 63 份：固定奖品六档，单桌多桌通用，无全场环节 | **当前版本** |
+
+切换版本：把 `current` 改为目标版本名 → `make pdf` → 提交，网站随部署自动更新。新增版本的要求见 [AGENTS.md](AGENTS.md) 的版本模型。
+
 ## 🔧 本地开发
 
-直接使用规则纸可下载现成 PDF，无需准备开发环境。想自己动手时，三个环节各只需一条命令：
+直接使用规则纸可下载现成 PDF，无需准备开发环境。想自己动手时，各环节只需一条命令：
 
-- **编译规则纸**：仓库根目录运行 `make pdf`，依赖 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）。
+- **编译规则纸**：仓库根目录运行 `make pdf`（编译 `current` 指向的版本），依赖 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）；`make pdf-all` 把全部版本各编一遍供检查。
 - **启动讲解网页**：在 `site/` 目录运行 `npm install && npm run dev`，技术栈为 Astro + Tailwind。
-- **机器验证**：仓库根目录运行 `python3 scripts/state_machine.py`，仅依赖 Python 3 标准库。
+- **机器验证**：仓库根目录运行 `python3 scripts/state_machine.py` 与 `python3 scripts/version_consistency.py`，均仅依赖 Python 3 标准库。
 
 依赖安装、预览与二维码核查、构建部署等完整步骤，见 [docs/local-dev-and-verification.md](docs/local-dev-and-verification.md)。
 
@@ -121,18 +131,21 @@ flowchart TD
 
 | 路径 | 说明 |
 | --- | --- |
-| [rules-paper.tex](rules-paper.tex) | 规则纸唯一源稿，规则语义以它为准 |
-| [output/pdf/rules-paper.pdf](output/pdf/rules-paper.pdf) | 唯一交付 PDF，由 `make pdf` 生成 |
-| [site/](site/) | 讲解网页，含骰面示例与常见疑问 |
+| [current](current) | 版本指针，一行版本名；决定编译与网站渲染的版本 |
+| [versions/](versions/) | 版本仓库，每版自含规则纸源稿、说明（含特征句）与网页文案 |
+| [versions/classic/rules-paper.tex](versions/classic/rules-paper.tex) | 当前版本源稿，规则语义以它为准 |
+| [output/pdf/rules-paper.pdf](output/pdf/rules-paper.pdf) | 唯一交付 PDF，永远 = current 指向的版本，由 `make pdf` 生成 |
+| [site/](site/) | 讲解网页，构建时按指针渲染当前版本，含骰面示例与常见疑问 |
 | [scripts/state_machine.py](scripts/state_machine.py) | 规则状态机与验证脚本 |
+| [scripts/version_consistency.py](scripts/version_consistency.py) | 各版本规则纸共享段落一致性检查 |
 | [scripts/paper_output_check.py](scripts/paper_output_check.py) | PDF 单页、底部安全线、预览渲染与二维码解码核查 |
 | [scripts/web_reading_check.py](scripts/web_reading_check.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
 | [docs/rule-audit.md](docs/rule-audit.md) | 资料来源、修订原因与验证记录 |
 | [docs/local-dev-and-verification.md](docs/local-dev-and-verification.md) | 编译、预览核查、网页开发与机器验证的运行手册 |
 | [docs/assets/](docs/assets/) / [docs/preview.png](docs/preview.png) | README 头图与规则纸预览 |
-| [Makefile](Makefile) / [.latexmkrc](.latexmkrc) | 编译配置，中间产物集中到 `build/` |
+| [Makefile](Makefile) / [.latexmkrc](.latexmkrc) | 编译配置，中间产物按版本集中到 `build/<版本>/` |
 | [.github/workflows/](.github/workflows/) | 规则检查与网页部署 |
-| [AGENTS.md](AGENTS.md) | 仓库协作约定 |
+| [AGENTS.md](AGENTS.md) | 仓库协作约定（版本模型、四件套、硬性约束） |
 
 ## 💡 如何贡献
 

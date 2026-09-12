@@ -18,6 +18,9 @@ jobs:
       - name: 规则状态机验证
         run: python3 scripts/state_machine.py
 
+      - name: 各版本共享段落一致
+        run: python3 scripts/version_consistency.py
+
       - name: 单页与版面约束（检查已提交的交付 PDF）
         run: |
           sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
@@ -28,3 +31,13 @@ jobs:
           ymax=$(pdftotext -bbox "$PDF" - | grep -oE 'yMax="[0-9.]+"' | sort -t'"' -k2 -n | tail -1 | grep -oE '[0-9.]+')
           echo "内容最低点 yMax: ${ymax} pt（安全线 806）"
           awk -v y="$ymax" 'BEGIN{exit !(y <= 806)}' || { echo "失败：yMax 超出安全线 806"; exit 1; }
+
+      - name: 指针与交付 PDF 一致（特征句抽查）
+        run: |
+          CURRENT=$(cat current)
+          FEATURE=$(sed -n 's/^特征句：//p' "versions/$CURRENT/README.md" | head -1 | tr -d '[:space:]')
+          [ -n "$FEATURE" ] || { echo "失败：versions/$CURRENT/README.md 未声明特征句"; exit 1; }
+          TEXT=$(pdftotext "output/pdf/rules-paper.pdf" - | tr -d '[:space:]')
+          echo "$TEXT" | grep -qF "$FEATURE" \
+            || { echo "失败：交付 PDF 不含版本 $CURRENT 的特征句——改了 current 却没有重编译提交"; exit 1; }
+          echo "交付 PDF 与指针一致：$CURRENT"

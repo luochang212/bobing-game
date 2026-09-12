@@ -11,7 +11,8 @@ parser.add_argument('--browser', choices=['chromium', 'webkit'], default='chromi
 parser.add_argument('--channel', help='使用本机 Chrome 时传 chrome，仅限 Chromium')
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
-tex = (root / 'rules-paper.tex').read_text()
+current = (root / 'current').read_text().strip()
+tex = (root / 'versions' / current / 'rules-paper.tex').read_text()
 source_rolls = {tuple(re.findall(r'\d', group)) for group in re.findall(r'\\roll((?:\{\d\}){6})', tex)}
 source_rolls.update(tuple(re.findall(r'\d', group)) for group in re.findall(r'[1-6](?:、[1-6]){5}', tex))
 
