@@ -21,7 +21,7 @@
 make pdf
 ```
 
-`make pdf` 编译仓库根 `current` 指针指向的版本（版本表见 README），中间产物按版本落在 `build/<版本>/`，最终 PDF 始终输出到 [`output/pdf/rules-paper.pdf`](../output/pdf/rules-paper.pdf)。切换版本 = 改 `current` 后重新 `make pdf` 并提交。把 `versions/` 下全部版本各编译一遍供检查（不改写交付位）：
+`make pdf` 编译仓库根 `current` 指针指向的版本（版本表见 README），中间产物按版本落在 `build/<版本>/`，最终 PDF 始终输出到 [`output/pdf/rules-paper.pdf`](../output/pdf/rules-paper.pdf)。切换版本 = 改 `current` 后重新 `make pdf` 并提交。状元王加赛纸独立于版本，`make pdf-final` 单独编译，产物为 [`output/pdf/champion-final.pdf`](../output/pdf/champion-final.pdf)。把 `versions/` 下全部版本与加赛纸各编译一遍供检查（不改写交付位）：
 
 ```sh
 make pdf-all
@@ -45,7 +45,7 @@ make pdf
 
 ### 生成预览与核查二维码
 
-二维码地址直接写在 TeX 的 `\qrcode` 命令中，由 MacTeX 自带宏包生成矢量图。改地址后运行 `make pdf`，再用[输出验证脚本](../scripts/paper_output_check.py)检查并更新预览。
+二维码地址直接写在 TeX 的 `\qrcode` 命令中，由 MacTeX 自带宏包生成矢量图。改地址后运行 `make pdf`（加赛纸为 `make pdf-final`），再用[输出验证脚本](../scripts/paper_output_check.py)检查并更新预览；加赛纸需追加 `--pdf output/pdf/champion-final.pdf`，且其二维码指向 `/bobing-game/champion-final/`，核查时传入 `--url https://www.luochang.ink/bobing-game/champion-final/`。
 
 首次准备核查环境：
 
@@ -78,10 +78,11 @@ npm run build
 npm run preview
 ```
 
-产物位于 `site/dist/`。[部署工作流](../.github/workflows/site.yml) 配置为在 `main` 分支的 `site/**` 或工作流文件变化时部署到 GitHub Pages，也支持手动触发，线上地址为 [www.luochang.ink/bobing-game](https://www.luochang.ink/bobing-game/)。部署时会将规则纸复制为 `rules-paper.pdf`；本地预览构建产物时，如需使用页面上的 PDF 下载入口，可先在 `site/` 目录执行：
+产物位于 `site/dist/`。[部署工作流](../.github/workflows/site.yml) 配置为在 `main` 分支的 `site/**`、`versions/**`、`champion-final/**` 或工作流文件变化时部署到 GitHub Pages，也支持手动触发，线上地址为 [www.luochang.ink/bobing-game](https://www.luochang.ink/bobing-game/)。主页按 `current` 指针渲染桌内版本，`/champion-final/` 为状元王加赛页（不随指针）。部署时会将两份规则纸复制为 `rules-paper.pdf` 与 `champion-final.pdf`；本地预览构建产物时，如需使用页面上的 PDF 下载入口，可先在 `site/` 目录执行：
 
 ```sh
 cp ../output/pdf/rules-paper.pdf dist/rules-paper.pdf
+cp ../output/pdf/champion-final.pdf dist/champion-final.pdf
 ```
 
 ## 机器验证
@@ -90,15 +91,17 @@ cp ../output/pdf/rules-paper.pdf dist/rules-paper.pdf
 
 ```sh
 python3 scripts/state_machine.py
+python3 scripts/champion_final.py
 python3 scripts/version_consistency.py
 ```
 
 | 检查层级 | 覆盖内容 |
 | --- | --- |
 | 全枚举 | 46656 种骰面归类 |
-| 确定性剧本 | 20 项，覆盖奖品发完、状元比较、先得者保留、补轮反超与结束边界 |
+| 确定性剧本 | 20 项（tiered）＋5 项（pooled），覆盖奖品发完、状元比较、先得者保留、补轮反超与结束边界 |
 | 随机整局 | 修订前对照与现行结束条款各 10000 局，检查终止情况、库存守恒与路径分布 |
-| 版本共享段 | 各版本规则纸共享段与 site-data 共享键两两比对，改共享规则必须所有版本同步 |
+| 状元王加赛 | 7 项剧本＋10000 局随机，覆盖领先挑战与封盘、无状元兜底、加掷一掷两用、同和再掷 |
+| 版本共享段 | 各源稿共享段与 site-data 共享键两两比对，改共享规则必须同步对应源稿 |
 
 <details>
 <summary>查看验证输出节选</summary>

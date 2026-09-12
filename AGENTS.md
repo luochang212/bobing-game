@@ -31,7 +31,7 @@
   必须同步对应源稿。
 - 换版本 = 改 `current` → `make pdf` → 提交。新增版本 = 新建 `versions/<名>/`
   （tex、README 含特征句、site-data.json）→ `make pdf-all` 编译检查 → 全套验证。
-- 版本名只描述自己（如 `classic`＝标准 63 份、无全场环节），"当前用哪个"只由
+- 版本名只描述自己（如 `classic`＝标准 63 份），"当前用哪个"只由
   `current` 表达；文件名一律英文，文件内容保持中文。
 
 ## 文件职责
@@ -60,11 +60,13 @@
 - `docs/local-dev-and-verification.md`：编译、预览与二维码核查、网页开发与机器验证
   的运行手册；README 简述各环节并链接过去。
 - `README.md`：使用说明 + 版本表（仓库内的版本列表）+ 游戏流程 mermaid 图。
-- `site/`：讲解版网页（Astro + Tailwind，部署到 GitHub Pages，workflow 为
-  `.github/workflows/site.yml`）。构建时读 `current`、加载当前版本的
-  `site-data.json` 渲染，不设多版本路由。定位是"解释与举例"，不是第二份规则权威源：
-  页面措辞逐句对齐 tex，页头注明"以现场纸质规则为准"；改规则若影响页面举例，
-  同步更新对应版本的 site-data.json。
+- `site/`：讲解网页（Astro + Tailwind，部署到 GitHub Pages，workflow 为
+  `.github/workflows/site.yml`）。主页构建时读 `current`、加载当前版本的
+  `site-data.json` 渲染桌内规则，不设多版本路由；`/champion-final/` 为加赛纸
+  的网页版，数据取自 `champion-final/site-data.json`，不随指针。两个页面互不
+  引用——主页不出现加赛内容，与桌纸不含状元王同构。定位是"解释与举例"，
+  不是第二份规则权威源：页面措辞逐句对齐 tex，页头注明"以现场纸质规则为准"；
+  改规则若影响页面举例，同步更新对应源稿的 site-data.json。
 - `build/`：编译中间产物，按版本分目录。
 
 ## 常用命令
@@ -96,7 +98,8 @@ MacTeX 自带的 `qrcode` 宏包直接生成，目标为 `https://www.luochang.i
 
 tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐：
 
-1. 改受影响版本的 `versions/<名>/rules-paper.tex`；共享段改动必须同步**所有版本**；
+1. 改受影响版本的 `versions/<名>/rules-paper.tex`；改加赛规则则改
+   `champion-final/rules-paper.tex`；共享段改动必须同步**所有共享它的源稿**；
 2. 同步修改 `scripts/state_machine.py` 的 classify / 状态机（受影响的剧本一并改）；
 3. 在 `docs/rule-audit.md` 增补修订记录（改了什么、依据是什么）；
 4. `make pdf` 重编译；README 的流程图与受影响版本的 site-data.json 一并更新。

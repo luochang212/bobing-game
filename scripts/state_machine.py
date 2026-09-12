@@ -12,7 +12,7 @@
 3. 随机整局：字面规则与拟修订规则各 10000 局，验证终止性、
    库存守恒、领取恰 62 份、领先者单调；pooled 模型另有 10000 局。
 
-奖品模型两种：'tiered'（classic/grand-final：六档固定库存合计 62 份，该档
+奖品模型两种：'tiered'（classic：六档固定库存合计 62 份，该档
 发完空过）与 'pooled'（flexible：单一奖池若干份、先留 1 份作状元奖，掷中
 普通奖且有货即领 1 份，奖池领空即进入收尾；纸面不标注数量，POOL0 仅为
 模拟默认值）。
@@ -65,7 +65,7 @@ def run_game(rolls, start_stock=None, start_leader=None, players=8,
              max_rolls=20000, sum_phase_mode='proposed', stop_after_rounds=None,
              prize_model='tiered', start_pool=None):
     """按规则纸执行整局。prize_model:
-    'tiered' = classic/grand-final：六档固定库存，该档发完空过；
+    'tiered' = classic：六档固定库存，该档发完空过；
     'pooled' = flexible：单一奖池（start_pool），掷中普通奖有货即领 1 份。
     sum_phase_mode:
     'literal'  = 修订前字面：加赛后每人加掷一次，一律比六颗总和（含状元骰面）；
