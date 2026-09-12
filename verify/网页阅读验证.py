@@ -30,6 +30,10 @@ with sync_playwright() as p:
             response = page.goto(args.url, wait_until='networkidle')
             assert response.status == 200
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'{width}px 横向溢出'
+            assert page.locator('.game-intro:visible').count() == 1, '先建立游戏与两种发奖方式的整体认识'
+            assert page.locator('.game-route > li:visible').count() == 3
+            section_ids = page.locator('main > section[id]').evaluate_all('(items) => items.map(el => el.id)')
+            assert section_ids == ['overview', 'start', 'prizes', 'champion', 'ending', 'questions'], '先全局，再个人操作、判奖、状元与收尾'
             assert page.locator('.prize-condition:visible').count() == 6, '六档判定必须无需点击全部展开'
             assert page.locator('.rank-row:visible').count() == 6
             assert page.locator('.exception-list article:visible').count() == 2, '出碗和叠骰规则不能藏在折叠区'
@@ -39,12 +43,12 @@ with sync_playwright() as p:
                 label = roll.get_attribute('aria-label')
                 assert tuple(re.findall(r'\d', label)) in source_rolls, label
             if width == 390:
-                metrics = page.evaluate('''() => ({firstStepY:document.querySelector('.steps').getBoundingClientRect().top,lastStepBottom:document.querySelector('.steps').getBoundingClientRect().bottom,rankRuleFont:parseFloat(getComputedStyle(document.querySelector('.rank-name p')).fontSize),rankCompareFont:parseFloat(getComputedStyle(document.querySelector('.rank-example > p')).fontSize)})''')
-                assert metrics['lastStepBottom'] <= height, '390×844 下三步基本玩法应完整出现在首屏'
+                metrics = page.evaluate('''() => ({introBottom:document.querySelector('.game-intro').getBoundingClientRect().bottom,overviewBottom:document.querySelector('.game-route').getBoundingClientRect().bottom,rankRuleFont:parseFloat(getComputedStyle(document.querySelector('.rank-name p')).fontSize),rankCompareFont:parseFloat(getComputedStyle(document.querySelector('.rank-example > p')).fontSize)})''')
+                assert metrics['introBottom'] <= height, '首屏先解释游戏与发奖方式，不要求把个人操作挤进首屏'
                 assert metrics['rankRuleFont'] >= 16 and metrics['rankCompareFont'] >= 16
                 print(f'{args.browser} 手机指标：{json.dumps(metrics, ensure_ascii=False)}')
             nav = page.get_by_role('navigation', name='规则目录')
-            assert nav.get_by_role('link').count() == 5
+            assert nav.get_by_role('link').count() == 6
             for link in nav.get_by_role('link').all():
                 box = link.bounding_box()
                 assert box['height'] >= 44 and box['width'] >= 44
@@ -81,9 +85,9 @@ with sync_playwright() as p:
         page.keyboard.press('Enter')
         page.wait_for_url('**/#main')
         assert page.url.endswith('#main')
-        assert page.locator('#start-title').bounding_box()['y'] >= page.locator('.reading-nav').bounding_box()['height']
+        assert page.locator('#overview-title').bounding_box()['y'] >= page.locator('.reading-nav').bounding_box()['height']
         assert page.locator('.prize-condition:visible').count() == 6
-        page.get_by_role('navigation', name='规则目录').get_by_role('link', name='出状况').click()
+        page.get_by_role('navigation', name='规则目录').get_by_role('link', name='小提醒', exact=True).click()
         assert page.url.endswith('#questions')
         page.locator('.faq-list summary').first.click()
         assert page.locator('.faq-list details[open]').count() == 1
