@@ -16,7 +16,7 @@ jobs:
           python-version: '3.x'
 
       - name: 规则状态机验证
-        run: python3 verify/状态机验证.py
+        run: python3 scripts/状态机验证.py
 
       - name: 单页与版面约束（检查已提交的交付 PDF）
         run: |

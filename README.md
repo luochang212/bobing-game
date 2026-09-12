@@ -113,7 +113,7 @@ flowchart TD
 
 - **编译规则纸**：仓库根目录运行 `make pdf`，依赖 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）。
 - **启动讲解网页**：在 `site/` 目录运行 `npm install && npm run dev`，技术栈为 Astro + Tailwind。
-- **机器验证**：仓库根目录运行 `python3 verify/状态机验证.py`，仅依赖 Python 3 标准库。
+- **机器验证**：仓库根目录运行 `python3 scripts/状态机验证.py`，仅依赖 Python 3 标准库。
 
 依赖安装、预览与二维码核查、构建部署等完整步骤，见 [docs/本地开发与机器验证.md](docs/本地开发与机器验证.md)。
 
@@ -124,9 +124,9 @@ flowchart TD
 | [博饼规则-A4黑白.tex](博饼规则-A4黑白.tex) | 规则纸唯一源稿，规则语义以它为准 |
 | [output/pdf/博饼规则-A4黑白.pdf](output/pdf/博饼规则-A4黑白.pdf) | 唯一交付 PDF，由 `make pdf` 生成 |
 | [site/](site/) | 讲解网页，含骰面示例与常见疑问 |
-| [verify/状态机验证.py](verify/状态机验证.py) | 规则状态机与验证脚本 |
-| [verify/规则纸输出验证.py](verify/规则纸输出验证.py) | PDF 单页、底部安全线、预览渲染与二维码解码核查 |
-| [verify/网页阅读验证.py](verify/网页阅读验证.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
+| [scripts/状态机验证.py](scripts/状态机验证.py) | 规则状态机与验证脚本 |
+| [scripts/规则纸输出验证.py](scripts/规则纸输出验证.py) | PDF 单页、底部安全线、预览渲染与二维码解码核查 |
+| [scripts/网页阅读验证.py](scripts/网页阅读验证.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
 | [docs/规则核查.md](docs/规则核查.md) | 资料来源、修订原因与验证记录 |
 | [docs/本地开发与机器验证.md](docs/本地开发与机器验证.md) | 编译、预览核查、网页开发与机器验证的运行手册 |
 | [docs/assets/](docs/assets/) / [docs/preview.png](docs/preview.png) | README 头图与规则纸预览 |
