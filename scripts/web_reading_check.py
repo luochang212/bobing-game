@@ -93,6 +93,28 @@ with sync_playwright() as p:
         page.locator('.faq-list summary').first.click()
         assert page.locator('.faq-list details[open]').count() == 1
         context.close()
-        print(f'PASS {args.browser}：7 种视口、六档直接阅读、13 组源稿骰面、目录触摸/鼠标跳转、章节直达、问答、PDF、无脚本阅读。')
+        # 状元王加赛页：可达、四节结构、骰面与加赛纸源稿一致、加赛纸 PDF 可下载。
+        context = browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, reduced_motion='reduce')
+        page = context.new_page()
+        errors = []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        response = page.goto(args.url + 'champion-final/', wait_until='networkidle')
+        assert response.status == 200, '加赛页不可达'
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), '加赛页 390px 横向溢出'
+        ids = page.locator('main > section[id]').evaluate_all('(items) => items.map(el => el.id)')
+        assert ids == ['join', 'judge', 'dry', 'tips'], f'加赛页节结构：{ids}'
+        final_rolls = {tuple(re.findall(r'\d', group)) for group in
+                       re.findall(r'\\roll((?:\{\d\}){6})', (root / 'champion-final' / 'rules-paper.tex').read_text())}
+        rolls = page.locator('.roll')
+        assert rolls.count() == 6, '加赛页应只展示状元等级表的 6 组骰面'
+        for roll in rolls.all():
+            label = roll.get_attribute('aria-label')
+            assert tuple(re.findall(r'\d', label)) in final_rolls, label
+        final_pdf = page.request.get(args.url + 'champion-final.pdf')
+        assert final_pdf.status == 200 and final_pdf.body().startswith(b'%PDF'), '加赛纸 PDF 不可下载'
+        assert not errors, errors
+        context.close()
+        print(f'PASS {args.browser}：7 种视口、六档直接阅读、13 组源稿骰面、目录触摸/鼠标跳转、章节直达、问答、PDF、无脚本阅读；'
+              f'加赛页四节结构、6 组骰面、加赛纸 PDF。')
     finally:
         browser.close()

@@ -188,6 +188,22 @@ def main():
     else:
         print(f'PASS site-data 共享键一致：当前 {len(datas)} 份数据，暂无可比对对象')
 
+    # 加赛纸网页数据：状元等级须与各版本网页数据一致。
+    final_json = ROOT / 'champion-final' / 'site-data.json'
+    if final_json.exists() and datas:
+        final_ranks = [(r['name'], tuple(r['faces']), r['rule'], r['compare'])
+                       for r in json.loads(final_json.read_text(encoding='utf-8'))['judge']['ranks']]
+        clean = True
+        for name, data in datas.items():
+            version_ranks = [(r['name'], tuple(r['faces']), r['rule'], r['compare'])
+                             for r in json_at(data, ('champion', 'ranks'))]
+            if version_ranks != final_ranks:
+                ok = False
+                clean = False
+                print(f'FAIL 加赛纸网页数据状元等级不一致：{name}')
+        if clean:
+            print(f'PASS 加赛纸网页数据状元等级一致：与 {len(datas)} 个版本相同')
+
     if not ok:
         raise SystemExit('共享内容不一致：改共享规则必须同步对应版本（见 AGENTS.md 四件套）')
 

@@ -1,6 +1,7 @@
 ---
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { findRepoRoot } from '../lib/repo.js';
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import Roll from '../components/Roll.astro';
@@ -10,18 +11,7 @@ import bowl from '../assets/porcelain-bowl.png';
 const pdf = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}rules-paper.pdf`;
 // 讲解页按仓库根的 current 指针渲染对应版本；文案随版本自含于 versions/<名>/site-data.json，
 // 规则语义仍以该版本 rules-paper.tex 为准，这里只负责讲解与展示。
-// 预渲染打包后 import.meta.url 不再指向源码位置，改从 cwd 向上找含 current 与 versions/ 的目录。
-function findRepoRoot(start) {
-  let dir = path.resolve(start);
-  for (let i = 0; i < 6; i++) {
-    if (existsSync(path.join(dir, 'current')) && existsSync(path.join(dir, 'versions'))) return dir;
-    const parent = path.dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-  throw new Error('找不到仓库根（应含 current 文件与 versions/ 目录）');
-}
-const repoRoot = findRepoRoot(process.cwd());
+const repoRoot = findRepoRoot();
 const current = readFileSync(path.join(repoRoot, 'current'), 'utf-8').trim();
 const data = JSON.parse(readFileSync(path.join(repoRoot, 'versions', current, 'site-data.json'), 'utf-8'));
 const prizes = data.prizes.items;

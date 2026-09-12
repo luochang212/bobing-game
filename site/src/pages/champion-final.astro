@@ -1,0 +1,61 @@
+---
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { findRepoRoot } from '../lib/repo.js';
+import Layout from '../layouts/Layout.astro';
+import Roll from '../components/Roll.astro';
+import { ArrowUpRight, Download } from 'lucide-astro';
+
+const pdf = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}champion-final.pdf`;
+const home = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+// 状元王加赛页：加赛纸（champion-final/）的网页版，独立一张、不随 current 指针变化；
+// 主页按指针渲染桌内版本，两个页面互不引用。
+const root = findRepoRoot();
+const current = readFileSync(path.join(root, 'current'), 'utf-8').trim();
+const data = JSON.parse(readFileSync(path.join(root, 'champion-final', 'site-data.json'), 'utf-8'));
+---
+<Layout title={data.meta.title} description={data.meta.description}>
+  <header class="site-header shell">
+    <a href="/" class="brand" aria-label="中秋博饼规则主页"><span class="brand-die" aria-hidden="true">四</span><span>中秋博饼</span></a>
+    <a class="header-download" href={pdf} download>加赛纸 PDF <Download aria-hidden="true" /></a>
+  </header>
+
+  <section class="hero shell" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title">{data.hero.title}</h1>
+      <p class="hero-description">{data.hero.description}</p>
+      <p class="edition">{data.hero.edition}</p>
+    </div>
+  </section>
+
+  <main id="main" class="shell reading-content">
+    <section id="join" class="overview-section" aria-labelledby="join-title">
+      <div class="section-heading"><h2 id="join-title">{data.join.title}</h2></div>
+      <ol class="game-route" aria-label="参加与座次">
+        {data.join.route.map((step, index) => <li><span>{index + 1}</span><div><h3>{step.title}</h3><p>{step.text}</p></div></li>)}
+      </ol>
+    </section>
+
+    <section id="judge" class="champion-section" aria-labelledby="judge-title">
+      <div class="section-heading"><h2 id="judge-title">{data.judge.title}</h2></div>
+      <div class="prose">
+        <Fragment set:html={data.judge.prose.join('\n')} />
+      </div>
+      <div class="rank-list"><p class="rank-list-caption">{data.judge.caption}</p>{data.judge.ranks.map((rank,index) => <div class:list={['rank-row',{'rank-first':index===0}]}><div class="rank-name"><h3>{rank.name}</h3><p>{rank.rule}</p></div><div class="rank-example"><Roll faces={rank.faces}/><p>{rank.compare}</p></div></div>)}</div>
+      <p class="rule-callout">{data.judge.elected}</p>
+    </section>
+
+    <section id="dry" class="ending-section" aria-labelledby="dry-title">
+      <div class="section-heading"><h2 id="dry-title">{data.dry.title}</h2></div>
+      <div class="prose section-lead"><Fragment set:html={data.dry.prose} /></div>
+    </section>
+
+    <section id="tips" class="questions-section" aria-labelledby="tips-title">
+      <div class="section-heading"><h2 id="tips-title">{data.tips.title}</h2></div>
+      <div class="exception-list">
+        {data.tips.exceptions.map(item => <article><h3>{item.title}</h3><p><Fragment set:html={item.text} /></p></article>)}
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer shell"><a class="brand" href={home}><span class="brand-die" aria-hidden="true">四</span><span>中秋博饼</span></a><p>祝大家中秋快乐，博个好彩头。</p><a href="https://github.com/luochang212/bobing-game">项目源码<ArrowUpRight aria-hidden="true" /></a></footer>
+</Layout>

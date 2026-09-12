@@ -31,8 +31,10 @@ jobs:
         working-directory: site
       - run: npm run build
         working-directory: site
-      - name: 附上规则纸 PDF
-        run: cp output/pdf/rules-paper.pdf site/dist/rules-paper.pdf
+      - name: 附上规则纸与加赛纸 PDF
+        run: |
+          cp output/pdf/rules-paper.pdf site/dist/rules-paper.pdf
+          cp output/pdf/champion-final.pdf site/dist/champion-final.pdf
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
