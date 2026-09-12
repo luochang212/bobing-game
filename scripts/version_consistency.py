@@ -68,13 +68,17 @@ def main():
     if len(datas) >= 2:
         keys = sorted(datas)
         base = keys[0]
+        clean = True
         for name in keys[1:]:
             for path in SHARED_JSON_KEYS:
                 a, b = json_at(datas[base], path), json_at(datas[name], path)
                 if a == b:
                     continue
                 ok = False
+                clean = False
                 print(f'FAIL site-data 共享键不一致：{base} vs {name}，键 {".".join(path)}')
+        if clean:
+            print(f'PASS site-data 共享键一致：{base} 与其余 {len(keys) - 1} 版（{len(SHARED_JSON_KEYS)} 组键）')
     else:
         print(f'PASS site-data 共享键一致：当前 {len(datas)} 份数据，暂无可比对对象')
 

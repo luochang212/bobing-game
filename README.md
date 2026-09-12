@@ -114,6 +114,7 @@ flowchart TD
 | 版本 | 定位 | 状态 |
 | --- | --- | --- |
 | [classic](versions/classic/) | 标准 63 份：固定奖品六档，单桌多桌通用，无全场环节 | **当前版本** |
+| [grand-final](versions/grand-final/) | 王中王：各桌独立博饼，各桌状元晋级全场“状元王”加赛 | 可选 |
 
 切换版本：把 `current` 改为目标版本名 → `make pdf` → 提交，网站随部署自动更新。新增版本的要求见 [AGENTS.md](AGENTS.md) 的版本模型。
 

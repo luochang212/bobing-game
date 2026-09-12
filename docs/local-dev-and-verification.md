@@ -21,7 +21,13 @@
 make pdf
 ```
 
-依赖 macOS 字体 **Songti SC / Hiragino Sans GB**。编译中间产物集中在 `build/`，最终 PDF 输出到 [`output/pdf/rules-paper.pdf`](../output/pdf/rules-paper.pdf)。
+`make pdf` 编译仓库根 `current` 指针指向的版本（版本表见 README），中间产物按版本落在 `build/<版本>/`，最终 PDF 始终输出到 [`output/pdf/rules-paper.pdf`](../output/pdf/rules-paper.pdf)。切换版本 = 改 `current` 后重新 `make pdf` 并提交。把 `versions/` 下全部版本各编译一遍供检查（不改写交付位）：
+
+```sh
+make pdf-all
+```
+
+依赖 macOS 字体 **Songti SC / Hiragino Sans GB**。
 
 <details>
 <summary>找不到 TeX 命令？</summary>
@@ -84,6 +90,7 @@ cp ../output/pdf/rules-paper.pdf dist/rules-paper.pdf
 
 ```sh
 python3 scripts/state_machine.py
+python3 scripts/version_consistency.py
 ```
 
 | 检查层级 | 覆盖内容 |
@@ -91,6 +98,7 @@ python3 scripts/state_machine.py
 | 全枚举 | 46656 种骰面归类 |
 | 确定性剧本 | 20 项，覆盖奖品发完、状元比较、先得者保留、补轮反超与结束边界 |
 | 随机整局 | 修订前对照与现行结束条款各 10000 局，检查终止情况、库存守恒与路径分布 |
+| 版本共享段 | 各版本规则纸共享段与 site-data 共享键两两比对，改共享规则必须所有版本同步 |
 
 <details>
 <summary>查看验证输出节选</summary>
