@@ -62,9 +62,11 @@
 - `README.md`：使用说明 + 版本表（仓库内的版本列表）+ 游戏流程 mermaid 图。
 - `site/`：讲解网页（Astro + Tailwind，部署到 GitHub Pages，workflow 为
   `.github/workflows/site.yml`）。主页构建时读 `current`、加载当前版本的
-  `site-data.json` 渲染桌内规则，不设多版本路由；`/champion-final/` 为加赛纸
-  的网页版，数据取自 `champion-final/site-data.json`，不随指针。两个页面互不
-  引用——主页不出现加赛内容，与桌纸不含状元王同构。定位是"解释与举例"，
+  `site-data.json` 渲染桌内规则，不设多版本路由；页脚按版本数据二选一——
+  多桌有状元王环节的版本放互跳入口（`footer.cross`），纯桌内版本放祝福语
+  占位（`footer.blessing`）；`/champion-final/` 为加赛纸
+  的网页版，数据取自 `champion-final/site-data.json`，不随指针。主页正文不出现
+  加赛内容（与桌纸不含状元王同构）。定位是"解释与举例"，
   不是第二份规则权威源：页面措辞逐句对齐 tex，页头注明"以现场纸质规则为准"；
   改规则若影响页面举例，同步更新对应源稿的 site-data.json。
 - `build/`：编译中间产物，按版本分目录。

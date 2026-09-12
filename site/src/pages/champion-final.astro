@@ -55,5 +55,5 @@ const data = JSON.parse(readFileSync(path.join(root, 'champion-final', 'site-dat
       </div>
     </section>
   </main>
-  <SiteFooter home={home} />
+  <SiteFooter home={home} cross={{ href: home, label: '桌内规则' }} blessing={false} />
 </Layout>

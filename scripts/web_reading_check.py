@@ -88,6 +88,14 @@ with sync_playwright() as p:
         assert page.url.endswith('#main')
         assert page.locator('#overview-title').bounding_box()['y'] >= page.locator('.reading-nav').bounding_box()['height']
         assert page.locator('.prize-condition:visible').count() == 6
+        # 页脚按版本场景二选一：有跨链则无祝福语；纯桌内则祝福语占位、无跨链。
+        footer_cfg = json.loads((root / 'versions' / current / 'site-data.json').read_text()).get('footer', {})
+        if footer_cfg.get('cross'):
+            assert page.locator('.site-footer a[href$="champion-final/"]').count() == 1, '跨链版本页脚应有加赛页入口'
+            assert page.locator('.site-footer > p').count() == 0, '跨链版本页脚不应有祝福语'
+        else:
+            assert page.locator('.site-footer > p').count() == 1, '纯桌内版本页脚应有祝福语'
+            assert page.locator('.site-footer a[href$="champion-final/"]').count() == 0, '纯桌内版本页脚不应有加赛入口'
         page.get_by_role('navigation', name='规则目录').get_by_role('link', name='小提醒', exact=True).click()
         assert page.url.endswith('#questions')
         page.locator('.faq-list summary').first.click()
@@ -112,6 +120,9 @@ with sync_playwright() as p:
             assert tuple(re.findall(r'\d', label)) in final_rolls, label
         final_pdf = page.request.get(args.url + 'champion-final.pdf')
         assert final_pdf.status == 200 and final_pdf.body().startswith(b'%PDF'), '加赛纸 PDF 不可下载'
+        cross = page.locator('.site-footer a', has_text='桌内规则')
+        assert cross.count() == 1 and (cross.first.get_attribute('href') or '').endswith('/bobing-game/'), \
+            '加赛页页脚应能跳回桌内规则主页'
         assert not errors, errors
         context.close()
         print(f'PASS {args.browser}：7 种视口、六档直接阅读、13 组源稿骰面、目录触摸/鼠标跳转、章节直达、问答、PDF、无脚本阅读；'

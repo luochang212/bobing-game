@@ -13,7 +13,7 @@
 
 <div align="center">
   <p><em>一张规则纸，开一桌中秋博饼。</em></p>
-  <p><a href="https://www.luochang.ink/bobing-game/">🌐 在线讲解页</a> · <a href="output/pdf/rules-paper.pdf">📄 规则 PDF</a> · <a href="#快速开始">快速开始</a> · <a href="#本地开发">本地开发</a></p>
+  <p><a href="https://www.luochang.ink/bobing-game/">🌐 在线讲解页</a> · <a href="https://www.luochang.ink/bobing-game/champion-final/">🏆 状元王加赛</a> · <a href="output/pdf/rules-paper.pdf">📄 规则 PDF</a> · <a href="#快速开始">快速开始</a> · <a href="#本地开发">本地开发</a></p>
 </div>
 
 ---
