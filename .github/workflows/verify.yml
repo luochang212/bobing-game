@@ -15,6 +15,11 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Python 脚本 ruff 检查
+        run: |
+          pip install ruff --quiet
+          ruff check scripts/
+
       - name: 规则状态机验证（桌内）
         run: python3 scripts/state_machine.py
 
@@ -42,23 +47,30 @@ jobs:
           DIR="versions/$CURRENT"
           [ -f "$DIR/rules-paper.tex" ] || { echo "失败：current 指向 '$CURRENT'，但 $DIR 不存在"; exit 1; }
           TEXT=$(pdftotext "output/pdf/rules-paper.pdf" - | tr -d '[:space:]')
-          sed -n 's/^特征句：//p' "$DIR/README.md" | sed 's/[[:space:]]//g' | grep -v '^$' > /tmp/features.txt
-          sed -n 's/^排除句：//p' "$DIR/README.md" | sed 's/[[:space:]]//g' | grep -v '^$' > /tmp/excluded.txt
+          # 无匹配时 grep 以 1 退出，set -e 会中断脚本——管道尾加 || true
+          sed -n 's/^特征句：//p' "$DIR/README.md" | sed 's/[[:space:]]//g' | grep -v '^$' > /tmp/features.txt || true
+          sed -n 's/^排除句：//p' "$DIR/README.md" | sed 's/[[:space:]]//g' | grep -v '^$' > /tmp/excluded.txt || true
           [ -s /tmp/features.txt ] || { echo "失败：$DIR/README.md 未声明特征句"; exit 1; }
           while IFS= read -r phrase; do
-            echo "$TEXT" | grep -qF "$phrase" \
-              || { echo "失败：交付 PDF 缺少版本 $CURRENT 的特征句「$phrase」——改了 current 却没有重编译提交"; exit 1; }
+            if echo "$TEXT" | grep -qF "$phrase"; then
+              echo "特征句「$phrase」存在 ✓"
+            else
+              echo "失败：交付 PDF 缺少版本 $CURRENT 的特征句「$phrase」——改了 current 却没有重编译提交"; exit 1
+            fi
           done < /tmp/features.txt
           while IFS= read -r phrase; do
-            echo "$TEXT" | grep -qF "$phrase" \
-              && { echo "失败：交付 PDF 含版本 $CURRENT 的排除句「$phrase」，疑似其他版本的产物"; exit 1; }
+            if echo "$TEXT" | grep -qF "$phrase"; then
+              echo "失败：交付 PDF 含版本 $CURRENT 的排除句「$phrase」，疑似其他版本的产物"; exit 1
+            else
+              echo "排除句「$phrase」未出现 ✓"
+            fi
           done < /tmp/excluded.txt
           echo "桌内交付 PDF 与指针一致：$CURRENT"
 
       - name: 加赛纸与源稿一致（特征句抽查）
         run: |
           TEXT=$(pdftotext "output/pdf/champion-final.pdf" - | tr -d '[:space:]')
-          sed -n 's/^特征句：//p' champion-final/README.md | sed 's/[[:space:]]//g' | grep -v '^$' > /tmp/final-features.txt
+          sed -n 's/^特征句：//p' champion-final/README.md | sed 's/[[:space:]]//g' | grep -v '^$' > /tmp/final-features.txt || true
           [ -s /tmp/final-features.txt ] || { echo "失败：champion-final/README.md 未声明特征句"; exit 1; }
           while IFS= read -r phrase; do
             echo "$TEXT" | grep -qF "$phrase" \
