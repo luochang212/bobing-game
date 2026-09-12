@@ -119,6 +119,7 @@ details[open] summary > span { transform: rotate(45deg); }
 .site-footer > a { min-height: 44px; display: inline-flex; align-items: center; }
 .site-footer .brand { font-size: 14px; color: var(--color-ink); }
 .site-footer .brand-die { width: 27px; height: 27px; font-size: 17px; }
+.site-footer > a svg { width: 10px; height: 10px; margin-left: 6px; }
 
 @media (max-width: 900px) {
   .hero { padding-inline: 0; }
