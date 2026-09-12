@@ -116,8 +116,9 @@ flowchart TD
 | 版本 | 定位 |
 | --- | --- |
 | [classic](versions/classic/) | 标准 63 份：固定奖品六档，单桌多桌通用，无全场环节 |
-| [grand-final](versions/grand-final/) | 王中王：各桌独立博饼，各桌状元晋级全场“状元王”加赛 |
+| [grand-final](versions/grand-final/) | 王中王：固定 63 份，各桌状元晋级全场“状元王”加赛 |
 | [flexible](versions/flexible/) | 灵活奖品：奖品若干、先留 1 份作状元奖，单桌多桌通用，无全场环节 |
+| [flexible-grand-final](versions/flexible-grand-final/) | 灵活奖品 · 王中王：奖品若干，各桌状元晋级全场“状元王”加赛 |
 
 当前编译与网站渲染哪个版本，由仓库根 `current` 指针决定（内容一行版本名），本表刻意不固定标注：切换只需把 `current` 改为目标版本、`make pdf` 后提交，网站随部署自动更新。新增版本的要求见 [AGENTS.md](AGENTS.md) 的版本模型。
 
