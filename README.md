@@ -13,14 +13,14 @@
 
 <div align="center">
   <p><em>一张规则纸，开一桌中秋博饼。</em></p>
-  <p><a href="output/pdf/博饼规则-A4黑白.pdf">📄 下载规则 PDF</a> · <a href="#快速开始">快速开始</a> · <a href="#本地开发">本地开发</a></p>
+  <p><a href="https://www.luochang.ink/bobing-game/">🌐 在线讲解页</a> · <a href="output/pdf/博饼规则-A4黑白.pdf">📄 下载规则 PDF</a> · <a href="#快速开始">快速开始</a> · <a href="#本地开发">本地开发</a></p>
 </div>
 
 ---
 
 ## ✨ 项目介绍
 
-为中秋晚会准备的一套博饼规则物料：**A4 黑白规则纸、网页讲解和规则验证脚本**。打印一张纸，备好六颗骰子、一个大碗和 63 份奖品，就能开局。
+为中秋活动准备的一套博饼规则物料：**A4 黑白规则纸、网页讲解和规则验证脚本**。打印一张纸，备好六颗骰子、一个大碗和 63 份奖品，就能开局。
 
 - **打印即用**：玩法步骤、奖级对照、状元比较和异常处理都在一张 A4 纸上，附桌号与状元记录栏。
 - **方便讲解**：网页提供骰面示例和常见疑问，适合活动前熟悉玩法。
@@ -29,7 +29,7 @@
 
 > [!NOTE]
 >
-> 本稿是**本次晚会统一版**。各地博饼习俗存在差异，奖级排序、兼奖、平局与结束方式均为本场约定，不作为各地通行的传统规则。网页用于解释与举例，以现场纸质规则为准。
+> 本稿是**本次活动统一版**。各地博饼习俗存在差异，奖级排序、兼奖、平局与结束方式均为本场约定，不作为各地通行的传统规则。网页用于解释与举例，以现场纸质规则为准。
 
 <a id="快速开始"></a>
 
@@ -114,6 +114,7 @@ flowchart TD
 | 规则纸排版 | LaTeX、MacTeX（latexmk + XeLaTeX）、macOS 字体 |
 | 讲解网页 | Astro、Tailwind CSS、Node.js 与 npm |
 | 规则验证 | Python 3，仅依赖标准库 |
+| 网页回归检查 | Python 3 + Playwright（Chromium / WebKit） |
 | 自动检查与部署 | GitHub Actions、Poppler、GitHub Pages |
 
 ### 编译规则纸
@@ -155,7 +156,7 @@ npm run build
 npm run preview
 ```
 
-产物位于 `site/dist/`。[部署工作流](.github/workflows/site.yml) 配置为在 `main` 分支的 `site/**` 或工作流文件变化时部署到 GitHub Pages，也支持手动触发。部署时会将规则纸复制为 `rules-paper.pdf`；本地预览构建产物时，如需使用页面上的 PDF 下载入口，可先在 `site/` 目录执行：
+产物位于 `site/dist/`。[部署工作流](.github/workflows/site.yml) 配置为在 `main` 分支的 `site/**` 或工作流文件变化时部署到 GitHub Pages，也支持手动触发，线上地址为 [www.luochang.ink/bobing-game](https://www.luochang.ink/bobing-game/)。部署时会将规则纸复制为 `rules-paper.pdf`；本地预览构建产物时，如需使用页面上的 PDF 下载入口，可先在 `site/` 目录执行：
 
 ```sh
 cp ../output/pdf/博饼规则-A4黑白.pdf dist/rules-paper.pdf
@@ -201,6 +202,7 @@ python3 verify/状态机验证.py
 | [output/pdf/博饼规则-A4黑白.pdf](output/pdf/博饼规则-A4黑白.pdf) | 唯一交付 PDF，由 `make pdf` 生成 |
 | [site/](site/) | 讲解网页，含骰面示例与常见疑问 |
 | [verify/状态机验证.py](verify/状态机验证.py) | 规则状态机与验证脚本 |
+| [verify/网页阅读验证.py](verify/网页阅读验证.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
 | [docs/规则核查.md](docs/规则核查.md) | 资料来源、修订原因与验证记录 |
 | [docs/assets/](docs/assets/) / [docs/preview.png](docs/preview.png) | README 头图与规则纸预览 |
 | [Makefile](Makefile) / [.latexmkrc](.latexmkrc) | 编译配置，中间产物集中到 `build/` |
