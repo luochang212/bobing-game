@@ -6,11 +6,16 @@
 回合推进 → 三段式结束），做三层检查：
 
 1. 全枚举：46656 种骰面归类唯一、无遗漏、无重叠；
-2. 确定性剧本：覆盖"所掷奖级发完空过不降档"、状元各等级两两比较、
-   先得者保留、每人只记最好成绩、补完一轮与加赛轮中的反超，以及
-   比总和阶段的规格缺口（K 组）；
+2. 确定性剧本：20 项覆盖 tiered 模型（"所掷奖级发完空过不降档"、状元各等级
+   两两比较、先得者保留、每人只记最好成绩、补完一轮与加赛轮中的反超，以及
+   比总和阶段的规格缺口 K 组），5 项覆盖 pooled 模型（L 组）；
 3. 随机整局：字面规则与拟修订规则各 10000 局，验证终止性、
-   库存守恒、领取恰 62 份、领先者单调。
+   库存守恒、领取恰 62 份、领先者单调；pooled 模型另有 10000 局。
+
+奖品模型两种：'tiered'（classic/grand-final：六档固定库存合计 62 份，该档
+发完空过）与 'pooled'（flexible：单一奖池若干份、先留 1 份作状元奖，掷中
+普通奖且有货即领 1 份，奖池领空即进入收尾；纸面不标注数量，POOL0 仅为
+模拟默认值）。
 
 运行：python3 scripts/state_machine.py
 依赖：仅 Python 3 标准库。
@@ -47,6 +52,7 @@ def classify(roll):
 
 ZY_RANK = {'插金花': 6, '六红': 5, '六同': 4, '五红': 3, '五子': 2, '四红': 1}
 STOCK0 = {'对堂': 2, '三红': 4, '四进': 8, '二举': 16, '一秀': 32}   # 合计 62
+POOL0 = 24   # pooled 模型默认普通奖池，仅用于模拟；纸面不标注数量
 NOTHING = (1, 1, 2, 2, 3, 3)   # 全场无奖骰面，用作剧本填充
 
 def zy_beats(a, b):
@@ -56,18 +62,26 @@ def zy_beats(a, b):
     return False
 
 def run_game(rolls, start_stock=None, start_leader=None, players=8,
-             max_rolls=20000, sum_phase_mode='proposed', stop_after_rounds=None):
-    """按规则纸执行整局。sum_phase_mode:
+             max_rolls=20000, sum_phase_mode='proposed', stop_after_rounds=None,
+             prize_model='tiered', start_pool=None):
+    """按规则纸执行整局。prize_model:
+    'tiered' = classic/grand-final：六档固定库存，该档发完空过；
+    'pooled' = flexible：单一奖池（start_pool），掷中普通奖有货即领 1 份。
+    sum_phase_mode:
     'literal'  = 修订前字面：加赛后每人加掷一次，一律比六颗总和（含状元骰面）；
     'proposed' = 现行条款："每人再掷一次"一掷两用——有人掷出状元按第三节比，
                  都未掷出则比同一掷的六颗总和，总和相同者再掷。"""
-    stock = dict(STOCK0 if start_stock is None else start_stock)
+    if prize_model == 'pooled':
+        assert start_stock is None, "pooled 模型用 start_pool，不用 start_stock"
+        stock = {'普通': POOL0 if start_pool is None else start_pool}
+    else:
+        stock = dict(STOCK0 if start_stock is None else start_stock)
     leader = start_leader            # (rank, pts, seq, player)
     seq = 0
-    exhausted = (start_stock is not None and sum(start_stock.values()) == 0)
+    exhausted = sum(stock.values()) == 0
     log = []; n_rolls = 0; overtime_done = False; claimed = 0; rounds = 0
     start_sum = sum(stock.values())
-    if start_stock is not None:
+    if prize_model == 'tiered':
         assert start_sum <= 62 and all(v >= 0 for v in stock.values())
 
     def do_roll(seat):
@@ -82,8 +96,12 @@ def run_game(rolls, start_stock=None, start_leader=None, players=8,
                 leader = cand
             log.append(('Z', tier, seat, roll))
         elif cat == 'N':
-            if stock[tier] > 0:
-                stock[tier] -= 1; claimed += 1
+            if prize_model == 'pooled':
+                available, taken = stock['普通'] > 0, '普通'
+            else:
+                available, taken = stock[tier] > 0, tier
+            if available:
+                stock[taken] -= 1; claimed += 1
                 if sum(stock.values()) == 0: exhausted = True
                 log.append(('N', tier, seat, roll, '领'))
             else:
@@ -235,17 +253,53 @@ def scenario_tests():
       and g['n_rolls'] == 6)
     return res
 
+# ---------- 2b. pooled（flexible）奖品模型剧本 ----------
+def pooled_scenarios():
+    res = []
+    def t(name, cond): res.append((name, cond))
+    def feed(lst, filler=NOTHING):
+        return chain(lst, repeat(filler))
+
+    # L1. 奖池领空即进入收尾：领走最后 1 份后，补轮中产生的状元有效并结束
+    g = run_game(feed([(4,1,2,3,5,6), (4,4,4,4,6,6)]), prize_model='pooled', start_pool=1, players=2)
+    t("L1 奖池领空触发收尾，补轮中状元结束", g['end'] == 'path1_有状元' and g['claimed'] == 1
+      and g['log'][0][4] == '领')
+
+    # L2. 有货即领，与档位无关：对堂、一秀同样各领 1 份
+    g = run_game(feed([(1,2,3,4,5,6), (4,1,2,3,5,6)]), prize_model='pooled', start_pool=5, players=2,
+                 stop_after_rounds=1)
+    t("L2 掷中任意普通奖各领 1 份", g['claimed'] == 2 and g['stock']['普通'] == 3)
+
+    # L3. 不兼奖：222244 只算四进，一掷只领 1 份
+    g = run_game(feed([(2,2,2,2,4,4)]), prize_model='pooled', start_pool=5, players=1,
+                 stop_after_rounds=1)
+    t("L3 222244 只领 1 份，不另领二举", g['claimed'] == 1 and g['stock']['普通'] == 4)
+
+    # L4. 空池收尾：补轮掷中普通奖 → 空过，不占预留的状元奖
+    g = run_game(feed([(1,1,1,1,2,3), (4,4,4,4,6,6)]), prize_model='pooled', start_pool=0, players=2)
+    t("L4 空池补轮掷中奖级→空过", g['end'] == 'path1_有状元' and g['claimed'] == 0
+      and g['log'][0][4] == '空过')
+
+    # L5. 无人博到状元时，比总和兜底在奖池模型下同样成立
+    seq_l = [(1,1,2,2,3,3)]*4 + [(6,6,6,6,5,5), (2,2,2,2,1,1)]
+    g = run_game(feed(seq_l), prize_model='pooled', start_pool=0, players=2, sum_phase_mode='proposed')
+    t("L5 比总和兜底成立", g['end'] == 'path3_比总和' and g['winner'] == 0 and g['n_rolls'] == 6)
+    return res
+
 # ---------- 3. 随机整局：不变量 + 终止性 ----------
-def random_games(n=10000, players=8, seed=2026, sum_phase_mode='proposed'):
+def random_games(n=10000, players=8, seed=2026, sum_phase_mode='proposed',
+                prize_model='tiered', pool=POOL0):
     rng = random.Random(seed)
     ends = Counter(); max_r = 0
+    total = 62 if prize_model == 'tiered' else pool
     for _ in range(n):
         def rolls():
             while True: yield tuple(rng.randint(1, 6) for _ in range(6))
-        g = run_game(rolls(), players=players, sum_phase_mode=sum_phase_mode)
+        g = run_game(rolls(), players=players, sum_phase_mode=sum_phase_mode,
+                     prize_model=prize_model, start_pool=pool)
         ends[g['end']] += 1; max_r = max(max_r, g['n_rolls'])
         assert all(v == 0 for v in g['stock'].values()), "库存未清空"
-        assert g['claimed'] == 62, "领取数≠62"
+        assert g['claimed'] == total, "领取数≠普通奖总数"
         # 状元掷出永不占普通奖：log 中 Z 条目长度恒为 4
         assert all(len(e) == 4 for e in g['log'] if e[0] == 'Z')
     return ends, max_r
@@ -258,10 +312,18 @@ if __name__ == '__main__':
     fails = [r for r in res if not r[1]]
     for name, ok in res:
         print(f"    [{'通过' if ok else '失败'}] {name}")
-    print(f"[2] 确定性剧本 {len(res)} 项，失败 {len(fails)} 项")
+    print(f"[2] tiered 确定性剧本 {len(res)} 项，失败 {len(fails)} 项")
+
+    res_p = pooled_scenarios()
+    fails_p = [r for r in res_p if not r[1]]
+    for name, ok in res_p:
+        print(f"    [{'通过' if ok else '失败'}] {name}")
+    print(f"[2b] pooled 确定性剧本 {len(res_p)} 项，失败 {len(fails_p)} 项")
 
     # 默认 sum_phase_mode='proposed'（现行条款）；'literal' 为修订前对照，显式指定。
     ends, max_r = random_games(sum_phase_mode='literal')
-    print(f"[3] 字面规则随机 10000 局全部终止（最长 {max_r} 掷），路径分布 {dict(ends)}")
+    print(f"[3] tiered 字面规则随机 10000 局全部终止（最长 {max_r} 掷），路径分布 {dict(ends)}")
     ends2, max_r2 = random_games(seed=77, sum_phase_mode='proposed')
-    print(f"[4] 拟修订规则随机 10000 局全部终止（最长 {max_r2} 掷），路径分布 {dict(ends2)}")
+    print(f"[4] tiered 拟修订规则随机 10000 局全部终止（最长 {max_r2} 掷），路径分布 {dict(ends2)}")
+    ends3, max_r3 = random_games(seed=20260912, prize_model='pooled')
+    print(f"[5] pooled（flexible）随机 10000 局全部终止（最长 {max_r3} 掷），路径分布 {dict(ends3)}")

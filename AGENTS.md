@@ -11,11 +11,14 @@ LaTeX 源稿，PDF 由当前版本编译生成，Python 脚本对规则文字做
   指针，只渲染当前版本（见 `site/`）。
 - `versions/<名>/` 每个版本自含全部版本特有内容：
   - `rules-paper.tex`：完整独立原稿（不做宏模板、不 `\input` 共享文件）；
-  - `README.md`：定位、依据链接，以及**特征句**——本版 PDF 有而他版没有的一句话，
-    供 CI 校验"指针与产物一致"（改了 `current` 忘重编译即红）；
+  - `README.md`：定位、依据链接，以及行首声明的两行元数据——**规则族**（同族
+    版本整段比对，跨族只锁定共识块，奖品模型不同即跨族）与**特征句**（本版
+    PDF 有而他版没有的一句话，供 CI 校验"指针与产物一致"，改了 `current`
+    忘重编译即红）；
   - `site-data.json`：讲解页全量文案（Astro 构建时按指针加载）。
-- 各版本必须一致的共享段落（奖级表、状元表、异常与收尾、记录栏）由
-  `scripts/version_consistency.py` 两两比对兜底；改共享段必须所有版本同步。
+- 各版本必须一致的共享内容由 `scripts/version_consistency.py` 兜底：同族
+  整段（奖级表、状元表、异常与收尾、记录栏）、跨族共识块（第一、三节与
+  出碗叠骰行）、site-data 核心/流程键两档；改共享内容必须同步对应版本。
 - 换版本 = 改 `current` → `make pdf` → 提交。新增版本 = 新建 `versions/<名>/`
   （tex、README 含特征句、site-data.json）→ `make pdf-all` 编译检查 → 全套验证。
 - 版本名只描述自己（如 `classic`＝标准 63 份、无全场环节），"当前用哪个"只由
@@ -26,8 +29,10 @@ LaTeX 源稿，PDF 由当前版本编译生成，Python 脚本对规则文字做
 - `current`：版本指针，一行版本名。
 - `versions/`：版本仓库（结构见上）。
 - `scripts/state_machine.py`：按规则纸文字逐条实现的状态机与验证（46656 种骰面
-  全枚举归类、20 项确定性剧本、随机整局模拟）。它镜像 tex 的规则，改规则必须同步改。
-- `scripts/version_consistency.py`：各版本规则纸共享段落一致性检查（纯标准库，CI 兜底）。
+  全枚举归类、tiered 20 项＋pooled 5 项确定性剧本、随机整局模拟）。它镜像 tex
+  的规则（`prize_model='tiered'|'pooled'` 两种奖品模型），改规则必须同步改。
+- `scripts/version_consistency.py`：各版本规则纸与网页数据共享内容一致性检查
+  （纯标准库，CI 兜底），按规则族分档比对。
 - `scripts/web_reading_check.py`：讲解页的浏览器回归检查（七种视口 × Chromium/WebKit、
   目录跳转、无脚本阅读），以当前版本 tex 为骰面基准；依赖 Playwright，运行方式见
   `docs/mobile-reading-check.md`。
@@ -115,9 +120,10 @@ yMax 红线与特征句。PDF 编译因字体依赖不在 CI 内，仍以本机 
 
 ## 当前已知状态
 
-- 版本模型 2026-09-12 上线：现有 `classic`（标准 63 份、无全场环节）与 `grand-final`
-  （各桌状元晋级全场加赛）两版，当前版本 `classic`，site 按指针渲染当前版；
-  设计依据见 `docs/rule-audit.md`。
+- 版本模型 2026-09-12 上线：现有 `classic`（标准 63 份）、`grand-final`（王中王）、
+  `flexible`（灵活奖品）三版；**当前指向以仓库根 `current` 文件为准**，本文档与
+  README 刻意不固定标注当前版本（README 版本表保持指针无关）。设计依据见
+  `docs/rule-audit.md`。
 - 比总和阶段遇真状元骰面的规格空白已收口：结束条款现为"有人掷出状元，就按第三节比较；
   都未掷出，就比六颗点数总和"，已写入 tex；脚本 `sum_phase_mode='proposed'` 对应
   现行条款，`'literal'` 保留为修订前对照。

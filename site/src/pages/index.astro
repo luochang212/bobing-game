@@ -81,7 +81,7 @@ const ranks = data.champion.ranks;
       <p class="dice-guide"><Fragment set:html={data.prizes.diceGuide} /></p>
       <div class="prize-list">
         {prizes.map(prize => <article class="prize-card" id={`prize-${prize.id}`} aria-labelledby={`title-${prize.id}`}>
-          <div class="prize-card-heading"><h3 id={`title-${prize.id}`}>{prize.name}</h3><span>{prize.id === 'zhuangyuan' ? '状元奖' : '普通奖'}，{prize.count} 份</span></div>
+          <div class="prize-card-heading"><h3 id={`title-${prize.id}`}>{prize.name}</h3><span>{prize.stock}</span></div>
           <p class="prize-condition">{prize.condition}</p>
           <div class="prize-example"><Roll faces={prize.faces}/><span>示例</span></div>
           {prize.id === 'zhuangyuan' && <a class="prize-rank-link" href="#champion">博到状元后，查看六个等级怎么比</a>}

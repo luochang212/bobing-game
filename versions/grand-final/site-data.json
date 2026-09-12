@@ -41,12 +41,12 @@
     "lead": "<p>拿自己的六颗点数，从下面<strong>最高的奖级往下找，找到第一个符合条件的就停</strong>。这一掷只按这一档处理，不兼领其他奖。</p>",
     "diceGuide": "<span class='mini-four'>4</span> 黑底「4」是四点，俗称“红四”。下方骰面只是一组示例，排列顺序不限，<strong>以文字条件为准</strong>。",
     "items": [
-      { "id": "zhuangyuan", "name": "状元", "count": 1, "faces": [4,4,4,4,2,6], "condition": "至少 4 颗四点，或 5 颗以上同点。" },
-      { "id": "duitang", "name": "对堂", "count": 2, "faces": [1,2,3,4,5,6], "condition": "1、2、3、4、5、6，各有 1 颗。" },
-      { "id": "sanhong", "name": "三红", "count": 4, "faces": [4,4,4,1,2,5], "condition": "恰有 3 颗四点。" },
-      { "id": "sijin", "name": "四进", "count": 8, "faces": [2,2,2,2,4,6], "condition": "恰有 4 颗同点，且该点数不是 4。" },
-      { "id": "erju", "name": "二举", "count": 16, "faces": [4,4,1,2,5,6], "condition": "恰有 2 颗四点。" },
-      { "id": "yixiu", "name": "一秀", "count": 32, "faces": [4,1,1,2,3,5], "condition": "恰有 1 颗四点。" }
+      { "id": "zhuangyuan", "name": "状元", "stock": "状元奖，1 份", "faces": [4,4,4,4,2,6], "condition": "至少 4 颗四点，或 5 颗以上同点。" },
+      { "id": "duitang", "name": "对堂", "stock": "普通奖，2 份", "faces": [1,2,3,4,5,6], "condition": "1、2、3、4、5、6，各有 1 颗。" },
+      { "id": "sanhong", "name": "三红", "stock": "普通奖，4 份", "faces": [4,4,4,1,2,5], "condition": "恰有 3 颗四点。" },
+      { "id": "sijin", "name": "四进", "stock": "普通奖，8 份", "faces": [2,2,2,2,4,6], "condition": "恰有 4 颗同点，且该点数不是 4。" },
+      { "id": "erju", "name": "二举", "stock": "普通奖，16 份", "faces": [4,4,1,2,5,6], "condition": "恰有 2 颗四点。" },
+      { "id": "yixiu", "name": "一秀", "stock": "普通奖，32 份", "faces": [4,1,1,2,3,5], "condition": "恰有 1 颗四点。" }
     ],
     "workedExample": {
       "title": "拿这一掷看一遍，就容易明白了",
