@@ -132,26 +132,27 @@ flowchart TD
 
 ## 📂 项目结构
 
-| 路径 | 说明 |
-| --- | --- |
-| [current](current) | 版本指针，一行版本名；决定编译与网站渲染的版本 |
-| [versions/](versions/) | 桌内规则纸版本仓库，每版自含源稿、说明（含特征句）与网页文案 |
-| [champion-final/](champion-final/) | 状元王加赛纸：独立一张，服务决赛桌，与奖品模型无关 |
-| [output/pdf/rules-paper.pdf](output/pdf/rules-paper.pdf) | 唯一桌内交付 PDF，永远 = current 指向的版本，由 `make pdf` 生成 |
-| [output/pdf/champion-final.pdf](output/pdf/champion-final.pdf) | 状元王加赛纸交付 PDF，由 `make pdf-final` 生成 |
-| [site/](site/) | 讲解网页，构建时按指针渲染当前版本，含骰面示例与常见疑问 |
-| [scripts/state_machine.py](scripts/state_machine.py) | 桌内规则状态机与验证脚本 |
-| [scripts/champion_final.py](scripts/champion_final.py) | 状元王加赛状态机与验证脚本（封盘、兜底、一掷两用） |
-| [scripts/version_consistency.py](scripts/version_consistency.py) | 各源稿共享内容一致性检查（含跨件状元等级表） |
-| [scripts/paper_output_check.py](scripts/paper_output_check.py) | PDF 单页、底部安全线、预览渲染与二维码解码核查 |
-| [scripts/web_reading_check.py](scripts/web_reading_check.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
-| [docs/rule-audit.md](docs/rule-audit.md) | 资料来源、修订原因与验证记录 |
-| [docs/local-dev-and-verification.md](docs/local-dev-and-verification.md) | 编译、预览核查、网页开发与机器验证的运行手册 |
-| [docs/mobile-reading-check.md](docs/mobile-reading-check.md) | 网页阅读体验的核查记录与回归命令 |
-| [docs/assets/](docs/assets/) / [docs/preview.png](docs/preview.png) | README 头图与规则纸预览 |
-| [Makefile](Makefile) / [.latexmkrc](.latexmkrc) | 编译配置，中间产物按版本集中到 `build/<版本>/` |
-| [.github/workflows/](.github/workflows/) | 规则检查与网页部署 |
-| [AGENTS.md](AGENTS.md) | 仓库协作约定（版本模型、四件套、硬性约束） |
+```text
+.
+├── current                      # 版本指针：一行版本名，决定编译与网页渲染的版本
+├── versions/                    # 桌内规则纸版本仓库（每版自含源稿、说明与网页文案）
+│   ├── classic/                 # 标准 63 份
+│   └── flexible/                # 灵活奖品：若干份，先留 1 份作状元奖
+├── champion-final/              # 状元王加赛纸：独立一张，不随指针变化
+├── scripts/                     # 机器验证
+│   ├── state_machine.py         # 桌内规则状态机（tiered / pooled 两种奖品模型）
+│   ├── champion_final.py        # 状元王加赛状态机（封盘、兜底、一掷两用）
+│   ├── version_consistency.py   # 共享内容一致性检查（含跨件状元等级表）
+│   ├── paper_output_check.py    # 交付 PDF 单页、安全线、二维码核查
+│   └── web_reading_check.py     # 讲解页浏览器回归（Playwright，七视口两引擎）
+├── site/                        # 讲解网页：主页随指针渲染，/champion-final/ 固定
+├── docs/                        # 决策留痕（rule-audit）与运行手册
+├── output/pdf/                  # 交付 PDF：桌内纸随指针＋加赛纸固定一张
+├── Makefile                     # make pdf / pdf-final / pdf-all
+└── AGENTS.md                    # 仓库协作约定（版本模型、四件套、验证标准）
+```
+
+各路径的详细职责见 [AGENTS.md](AGENTS.md)。
 
 ## 💡 如何贡献
 
