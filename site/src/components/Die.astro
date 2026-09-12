@@ -1,33 +1,5 @@
 ---
-// 单颗骰面：数字写在圆角方块里，与规则纸一致；
-// 4 为色块白字——纸上因黑白印刷用黑底，网页恢复传统"红四"的朱砂色。
-interface Props {
-  n: number;
-  size?: string;
-}
-const { n, size = '2rem' } = Astro.props;
+interface Props { value: number }
+const { value } = Astro.props;
 ---
-
-<svg
-  width={size}
-  height={size}
-  viewBox="0 0 40 40"
-  role="img"
-  aria-label={`骰子 ${n} 点`}
->
-  <rect
-    x="1.5"
-    y="1.5"
-    width="37"
-    height="37"
-    rx="8"
-    class={n === 4 ? 'die-4' : 'die-n'}
-  ></rect>
-  <text
-    x="20"
-    y="21"
-    text-anchor="middle"
-    dominant-baseline="central"
-    class={n === 4 ? 'die-4-t' : 'die-n-t'}>{n}</text
-  >
-</svg>
+<span class:list={['die', { 'die-four': value === 4 }]} aria-hidden="true">{value}</span>
