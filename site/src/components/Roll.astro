@@ -1,8 +1,8 @@
 ---
 import Die from './Die.astro';
-interface Props { faces: number[]; large?: boolean }
-const { faces, large = false } = Astro.props;
+interface Props { faces: number[] }
+const { faces } = Astro.props;
 ---
-<span class:list={['roll', { 'roll-large': large }]} role="img" aria-label={`骰面示例：${faces.join('、')}`}>
+<span class="roll" role="img" aria-label={`骰面示例：${faces.join('、')}`}>
   {faces.map(value => <Die value={value} />)}
 </span>

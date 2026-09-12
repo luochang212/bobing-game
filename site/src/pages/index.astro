@@ -7,12 +7,12 @@ import bowl from '../assets/porcelain-bowl.png';
 const pdf = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}rules-paper.pdf`;
 // 规则与示例均来自根目录 LaTeX 源稿；这里只负责讲解与展示。
 const prizes = [
-  { id: 'zhuangyuan', name: '状元', count: 1, faces: [4,4,4,4,2,6], condition: '至少 4 颗四点，或 5 颗以上同点。', note: '掷中先记名次，结束再领状元奖。不同状元骰面，还要按下方的六个等级比大小。', caption: '这一掷是「四红」，属于状元。' },
-  { id: 'duitang', name: '对堂', count: 2, faces: [1,2,3,4,5,6], condition: '1、2、3、4、5、6，各有 1 颗。', note: '六颗骰子凑齐六种点数，排列顺序不限。该档有奖品就领 1 份，发完则空过。', caption: '六种点数，恰好齐全。' },
-  { id: 'sanhong', name: '三红', count: 4, faces: [4,4,4,1,2,5], condition: '恰有 3 颗四点。', note: '普通奖每次领 1 份；所掷奖级发完就空过，不改领其他奖。', caption: '认准三颗「四点」。' },
-  { id: 'sijin', name: '四进', count: 8, faces: [2,2,2,2,4,6], condition: '恰有 4 颗同点，且该点数不是 4。', note: '例如 2、2、2、2、4、4 只算四进，不另领二举。四进发完，也不改领二举。', caption: '四颗相同的二点，博得四进。' },
-  { id: 'erju', name: '二举', count: 16, faces: [4,4,1,2,5,6], condition: '恰有 2 颗四点。', note: '先检查是否命中更高奖级，只认最高奖级；同一掷不兼领其他奖。', caption: '这一组没有更高奖级，按二举领奖。' },
-  { id: 'yixiu', name: '一秀', count: 32, faces: [4,1,1,2,3,5], condition: '恰有 1 颗四点。', note: '先检查是否命中更高奖级。未中奖或奖品已发完，也换下一位，不连掷。', caption: '一颗「四点」，也有好彩头。' },
+  { id: 'zhuangyuan', name: '状元', count: 1, faces: [4,4,4,4,2,6], condition: '至少 4 颗四点，或 5 颗以上同点。' },
+  { id: 'duitang', name: '对堂', count: 2, faces: [1,2,3,4,5,6], condition: '1、2、3、4、5、6，各有 1 颗。' },
+  { id: 'sanhong', name: '三红', count: 4, faces: [4,4,4,1,2,5], condition: '恰有 3 颗四点。' },
+  { id: 'sijin', name: '四进', count: 8, faces: [2,2,2,2,4,6], condition: '恰有 4 颗同点，且该点数不是 4。' },
+  { id: 'erju', name: '二举', count: 16, faces: [4,4,1,2,5,6], condition: '恰有 2 颗四点。' },
+  { id: 'yixiu', name: '一秀', count: 32, faces: [4,1,1,2,3,5], condition: '恰有 1 颗四点。' },
 ];
 const ranks = [
   { name: '状元插金花', faces: [4,4,4,4,1,1], rule: '4 颗四点＋2 颗一点', compare: '本场最高' },
@@ -23,75 +23,62 @@ const ranks = [
   { name: '四红', faces: [4,4,4,4,2,6], rule: '恰有 4 颗四点，排除插金花', compare: '比另 2 颗之和，大者胜' },
 ];
 ---
-<Layout title="中秋博饼 · 开一碗好运" description="六颗骰子，一碗好运。中秋博饼本次晚会统一版：快速开局、奖级查询、状元比较与 A4 黑白规则纸下载。以现场纸质规则为准。">
+<Layout title="中秋博饼规则 · 手机速查" description="六颗骰子，一碗好运。中秋博饼本次晚会统一版：快速开局、奖级查询、状元比较与 A4 黑白规则纸下载。以现场纸质规则为准。">
   <header class="site-header shell">
     <a href="#" class="brand" aria-label="中秋博饼，回到顶部"><span class="brand-die" aria-hidden="true">四</span><span>中秋博饼</span></a>
-    <nav aria-label="主要导航" class="flex items-center gap-7">
-      <a href="#prizes">查奖级</a><a href="#champion">比状元</a><a href="#questions" class="nav-extra">现场答疑</a>
-    </nav>
-    <a class="header-download" href={pdf} download>下载规则纸 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M5 16v5h14v-5"/></svg></a>
+    <a class="header-download" href={pdf} download>规则纸 PDF <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M5 16v5h14v-5"/></svg></a>
   </header>
 
-  <main id="main">
-    <section class="hero shell" aria-labelledby="hero-title">
-      <div class="hero-copy">
-        <p class="occasion"><span aria-hidden="true">○</span> 月圆，正好相聚</p>
-        <h1 id="hero-title">开一碗<br />好运<span class="title-dot">。</span></h1>
-        <p class="hero-description">六颗骰子落碗，一桌人笑开。<br />从一秀到状元，把中秋的好彩头博回来。</p>
-        <div class="hero-actions flex flex-wrap items-center gap-5">
-          <a class="button button-dark" href="#start">看看怎么玩 <span aria-hidden="true">↓</span></a>
-          <a class="text-link" href={pdf} download>打印一张规则纸</a>
-        </div>
-        <p class="edition">本次晚会统一版 · 以现场纸质规则为准</p>
-      </div>
-      <figure class="hero-art">
-        <Image src={bowl} alt="一只绘有花纹的白瓷碗，碗里放着六颗骰子" width={850} widths={[480,850,1254]} sizes="(max-width: 700px) 92vw, 55vw" format="webp" loading="eager" fetchpriority="high" />
-        <figcaption>六颗骰子，一碗好运</figcaption>
-      </figure>
-    </section>
+  <section class="hero shell" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title">中秋博饼规则</h1>
+      <p class="hero-description">轮流掷六颗骰子，按点数组合领奖。</p>
+      <p class="edition">本次晚会统一版 · 以现场纸质规则为准</p>
+    </div>
+    <figure class="hero-art">
+      <Image src={bowl} alt="花纹白瓷碗中的六颗骰子" width={400} widths={[160,400,800]} sizes="(max-width: 700px) 96px, 280px" format="webp" loading="eager" fetchpriority="high" />
+    </figure>
+  </section>
 
-    <section id="start" class="start-section shell" aria-labelledby="start-title">
-      <div class="start-heading"><h2 id="start-title">人齐，就开局。</h2><p>每桌备好这些，指定首位玩家<br class="desktop-break" />和一位兼任记录员的玩家。</p></div>
-      <dl class="supplies">
-        <div><dt>骰子</dt><dd>6<span>颗</span></dd></div>
-        <div><dt>大碗</dt><dd>1<span>个</span></dd></div>
-        <div><dt>奖品</dt><dd>63<span>份</span></dd></div>
-        <div><dt>A4 规则纸</dt><dd>1<span>张</span></dd></div>
-      </dl>
+  <nav class="reading-nav" aria-label="规则目录">
+    <div class="shell">
+      <a href="#start">怎么玩</a><a href="#prizes">查奖级</a><a href="#champion">比状元</a><a href="#ending">何时结束</a><a href="#questions">出状况</a>
+    </div>
+  </nav>
+
+  <main id="main" class="shell reading-content">
+    <section id="start" class="start-section" aria-labelledby="start-title">
+      <div class="section-heading"><h2 id="start-title">轮到你，做这三步</h2></div>
       <ol class="steps">
-        <li><span class="step-number">1</span><div><h3>按顺序，轮流来</h3><p>奖品分六档摆好。顺时针轮流，掷完传左手边，每人一次。</p></div></li>
-        <li><span class="step-number">2</span><div><h3>六颗一起，掷入碗</h3><p>完全静止后看朝上的点数。大家确认前，先别碰骰子。</p></div></li>
-        <li><span class="step-number">3</span><div><h3>看最高奖级，领奖</h3><p>普通奖每次领 1 份；状元先记名次。未中奖也换下一位。</p></div></li>
+        <li><span class="step-number">1</span><div><h3>六颗一起掷入碗</h3><p>完全静止后，看朝上的点数。大家确认前，先别碰骰子。</p></div></li>
+        <li><span class="step-number">2</span><div><h3>从高到低，查奖级</h3><p>按<a href="#prizes">下面的六档奖级</a>对照，<strong>只认最高奖级，不兼奖</strong>。未列组合不中奖。</p></div></li>
+        <li><span class="step-number">3</span><div><h3>领奖或记名，换下一位</h3><p>普通奖有货领 1 份；<strong>状元只记名次</strong>，最后发奖。顺时针轮流，掷完传左手边；未中奖也换人，不连掷。</p></div></li>
       </ol>
+      <p class="rule-callout"><strong>这一档奖品发完了？</strong>本次空过，不改领其他奖；普通奖不追回。</p>
+      <details class="setup-details"><summary>开局前，每桌要准备什么？<span aria-hidden="true">+</span></summary><div><p>6 颗骰子、1 个大碗、63 份奖品、1 张规则纸。奖品按六档摆好，指定首位玩家和一位兼任记录员的玩家，每人掷一次，轮完为一轮。</p><p>记录员记下当前状元领先者，每人只记最好成绩。</p></div></details>
     </section>
 
     <section id="prizes" class="prizes-section" aria-labelledby="prizes-title">
-      <div class="shell">
-        <div class="section-heading"><div><p class="section-intro">这一掷，是什么好彩头？</p><h2 id="prizes-title">六档奖级，对号入座。</h2></div><p>由高到低，只认最高奖级。<br />点选奖级，看看骰面怎么认。</p></div>
-        <div class="prize-explorer" data-prizes>
-          <div class="prize-tabs" aria-label="奖级，由高到低">
-            {prizes.map((prize, index) => <button type="button" id={`tab-${prize.id}`} class="prize-tab" data-index={index} aria-controls={`panel-${prize.id}`}><span>{prize.name}</span><span class="prize-count">{prize.count} 份</span><span class="tab-mark" aria-hidden="true">↗</span></button>)}
-          </div>
-          <div class="prize-panels">
-            {prizes.map(prize => <article id={`panel-${prize.id}`} class="prize-panel" aria-labelledby={`tab-${prize.id}`} tabindex="0">
-              <div class="prize-panel-top"><h3>{prize.name}</h3><span>共 {prize.count} 份奖品</span></div>
-              <p class="prize-condition">{prize.condition}</p>
-              <div class="sample-roll"><Roll faces={prize.faces} large /><p>{prize.caption}</p></div>
-              <p class="prize-note">{prize.note}</p>
-            </article>)}
-          </div>
-        </div>
-        <div class="prizes-footnote"><p><span class="mini-four">4</span> 黑底「4」表示四点，俗称“红四”。骰面仅为一组示例，顺序不限，以文字条件为准。</p><p>不兼奖 · 不降档 · 不通吃</p></div>
+      <div class="section-heading"><h2 id="prizes-title">这一掷，算哪一档？</h2><p>由高到低，只认最高奖级。</p></div>
+      <p class="dice-guide"><span class="mini-four">4</span> 黑底「4」是四点，俗称“红四”。下方骰面只是一组示例，排列顺序不限，<strong>以文字条件为准</strong>。</p>
+      <div class="prize-list">
+        {prizes.map(prize => <article class="prize-card" id={`prize-${prize.id}`} aria-labelledby={`title-${prize.id}`}>
+          <div class="prize-card-heading"><h3 id={`title-${prize.id}`}>{prize.name}</h3><span>共 {prize.count} 份</span></div>
+          <p class="prize-condition">{prize.condition}</p>
+          <div class="prize-example"><Roll faces={prize.faces}/><span>示例</span></div>
+          {prize.id === 'zhuangyuan' && <a class="prize-rank-link" href="#champion">博到状元后，查看六个等级怎么比</a>}
+        </article>)}
       </div>
+      <div class="worked-example"><h3>同时符合两档，怎么办？</h3><Roll faces={[2,2,2,2,4,4]} /><p>四颗二点符合<strong>四进</strong>，两颗四点也符合二举。四进更高，所以<strong>只算四进，不另领二举</strong>；四进发完也不改领二举。</p></div>
     </section>
 
-    <section id="champion" class="champion-section shell" aria-labelledby="champion-title">
-      <div class="champion-heading"><p class="section-intro">好戏，在状元。</p><h2 id="champion-title">都博到状元，<br />谁更胜一筹？</h2><p class="champion-description">先比等级，再比点数，大者领先。<br />相同则先得者保留，每人只记最好成绩。</p><div class="champion-note"><span class="note-symbol" aria-hidden="true">记</span><p>掷中状元只记名次，<br />不领普通奖。<br />奖品留到结束，颁给领先者。</p></div></div>
+    <section id="champion" class="champion-section" aria-labelledby="champion-title">
+      <div class="champion-heading"><h2 id="champion-title">都博到状元，怎么比？</h2><p class="champion-description"><strong>先比等级，再比点数，大者领先。</strong>相同则先得者保留，每人只记最好成绩。</p><p class="rule-callout">掷中状元<strong>只记名次，不领普通奖</strong>。结束时把状元奖颁给领先者，不兼奖、不通吃。</p></div>
       <div class="rank-list"><p class="rank-list-caption">本场状元等级，由高到低</p>{ranks.map((rank,index) => <div class:list={['rank-row',{'rank-first':index===0}]}><div class="rank-name"><h3>{rank.name}</h3><p>{rank.rule}</p></div><div class="rank-example"><Roll faces={rank.faces}/><p>{rank.compare}</p></div></div>)}</div>
     </section>
 
-    <section class="ending-section shell" aria-labelledby="ending-title">
-      <div class="section-heading"><div><p class="section-intro">把这一局，好好收尾</p><h2 id="ending-title">普通奖发完，再定状元。</h2></div><p>62 份普通奖＋1 份状元奖<br />普通奖不追回，状元奖最后发。</p></div>
+    <section id="ending" class="ending-section" aria-labelledby="ending-title">
+      <div class="section-heading"><h2 id="ending-title">什么时候结束？</h2><p>62 份普通奖发完后，按下面的顺序处理。</p></div>
       <ol class="ending-steps">
         <li><span>1</span><h3>先补完当前一轮</h3><p>62 份普通奖发完后，至首位玩家的前一位掷完。有状元领先者，即颁奖结束。</p></li>
         <li><span>2</span><h3>无人博到，加赛一轮</h3><p>仍无人博到状元，就加赛最后一轮。本轮有人博到，按状元比较规则定名次。</p></li>
@@ -99,55 +86,24 @@ const ranks = [
       </ol>
     </section>
 
-    <section id="questions" class="questions-section shell" aria-labelledby="questions-title">
-      <div><p class="section-intro">遇到这些，照着办</p><h2 id="questions-title">碗边小问答。</h2><p class="questions-subtitle">把容易争论的事，<br />在开局前说清楚。</p></div>
+    <section id="questions" class="questions-section" aria-labelledby="questions-title">
+      <div class="section-heading"><h2 id="questions-title">出状况，怎么处理？</h2></div>
+      <div class="exception-list">
+        <article><h3>有一颗出碗</h3><p><strong>本次无效，换下一位。</strong>任何一颗未入碗或跳出碗，都不重掷。</p></article>
+        <article><h3>全在碗内，但叠骰、斜立看不清</h3><p>由同桌确认后，<strong>六颗全部重掷</strong>。</p></article>
+      </div>
       <div class="faq-list">
         <details><summary>掷中了，但这一档奖品已经发完？<span aria-hidden="true">+</span></summary><p>本次空过，不改领其他奖。比如掷出四进，即使四进已发完，也不能改领二举或一秀。普通奖不追回，未列组合不中奖。</p></details>
-        <details><summary>骰子掉出碗，要重新掷吗？<span aria-hidden="true">+</span></summary><p>任何一颗未入碗或跳出碗，本次无效，换下一位，不重掷。</p></details>
-        <details><summary>骰子叠在一起，或斜着立起来？<span aria-hidden="true">+</span></summary><p>全部在碗内但叠骰、斜立，导致点数无法判定时，由同桌确认后，六颗全部重掷。</p></details>
         <details><summary>有两个四点，还能同时领别的奖吗？<span aria-hidden="true">+</span></summary><p>不能兼奖。比如 2、2、2、2、4、4，只算四进，不另领二举。同一掷从高到低只认最高奖级。</p></details>
         <details><summary>和我以前玩的规则不一样？<span aria-hidden="true">+</span></summary><p>各地博饼习俗略有不同。这里的排序、兼奖、平局和结束方式，均为本次晚会约定，以现场纸质规则为准。</p></details>
       </div>
     </section>
 
-    <section class="download-section shell" aria-labelledby="download-title">
+    <section class="download-section" aria-labelledby="download-title">
       <div class="paper-icon" aria-hidden="true"><span>中秋<br />博饼</span><i></i><i></i><i></i><small>A4</small></div>
-      <div class="download-copy"><h2 id="download-title">好规则，带到桌上。</h2><p>一张 A4，黑白打印。玩法、奖级和记录栏，都在纸上。</p><p class="print-settings">打印设置：纵向 · 实际大小 100% · 黑白</p></div>
+      <div class="download-copy"><h2 id="download-title">需要纸质版？</h2><p>每桌一张规则纸，手机同步查阅；需要补印可下载 PDF。</p><p class="print-settings">打印设置：纵向 · 实际大小 100% · 黑白</p></div>
       <a class="button button-dark" href={pdf} download>下载规则 PDF <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M5 16v5h14v-5"/></svg></a>
     </section>
   </main>
   <footer class="site-footer shell"><a class="brand" href="#"><span class="brand-die" aria-hidden="true">四</span><span>中秋博饼</span></a><p>祝大家中秋快乐，博个好彩头。</p><a href="https://github.com/luochang212/bobing-game">项目源码 ↗</a></footer>
 </Layout>
-
-<script>
-  const explorer = document.querySelector<HTMLElement>('[data-prizes]');
-  if (explorer) {
-    const tabs = [...explorer.querySelectorAll<HTMLButtonElement>('.prize-tab')];
-    const panels = [...explorer.querySelectorAll<HTMLElement>('.prize-panel')];
-    explorer.querySelector('.prize-tabs')?.setAttribute('role', 'tablist');
-    function select(index: number, focus = false) {
-      tabs.forEach((tab, i) => {
-        tab.setAttribute('role', 'tab');
-        tab.setAttribute('aria-selected', String(i === index));
-        tab.tabIndex = i === index ? 0 : -1;
-        panels[i].setAttribute('role', 'tabpanel');
-        panels[i].hidden = i !== index;
-      });
-      if (focus) tabs[index].focus();
-    }
-    tabs.forEach((tab, index) => {
-      tab.addEventListener('click', () => select(index));
-      tab.addEventListener('keydown', event => {
-        let next = index;
-        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % tabs.length;
-        else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index - 1 + tabs.length) % tabs.length;
-        else if (event.key === 'Home') next = 0;
-        else if (event.key === 'End') next = tabs.length - 1;
-        else return;
-        event.preventDefault();
-        select(next, true);
-      });
-    });
-    select(0);
-  }
-</script>
