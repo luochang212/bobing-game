@@ -15,8 +15,9 @@
 运行：python3 verify/状态机验证.py
 依赖：仅 Python 3 标准库。
 
-说明：sum_phase_mode='proposed' 与规则纸现行结束条款一致（2026-09-11 落地）；
-'literal' 保留为修订前的字面行为，仅作对照。详见 docs/规则核查.md。
+说明：sum_phase_mode='proposed' 与规则纸现行结束条款一致（2026-09-11 落地，
+2026-09-12 修正为与纸面相同的"一掷两用"）；'literal' 保留为修订前的字面
+行为，仅作对照。详见 docs/规则核查.md。
 """
 from itertools import product, chain, repeat
 from collections import Counter
@@ -55,10 +56,11 @@ def zy_beats(a, b):
     return False
 
 def run_game(rolls, start_stock=None, start_leader=None, players=8,
-             max_rolls=20000, sum_phase_mode='literal', stop_after_rounds=None):
+             max_rolls=20000, sum_phase_mode='proposed', stop_after_rounds=None):
     """按规则纸执行整局。sum_phase_mode:
-    'literal'  = 纸面字面：加赛后每人加掷一次，一律比六颗总和（含状元骰面）；
-    'proposed' = 拟修订：掷出状元的按第三节比，都未掷出才比总和。"""
+    'literal'  = 修订前字面：加赛后每人加掷一次，一律比六颗总和（含状元骰面）；
+    'proposed' = 现行条款："每人再掷一次"一掷两用——有人掷出状元按第三节比，
+                 都未掷出则比同一掷的六颗总和，总和相同者再掷。"""
     stock = dict(STOCK0 if start_stock is None else start_stock)
     leader = start_leader            # (rank, pts, seq, player)
     seq = 0
@@ -102,24 +104,23 @@ def run_game(rolls, start_stock=None, start_leader=None, players=8,
                             stock=stock, claimed=claimed, n_rolls=n_rolls, log=log)
             if not overtime_done:
                 overtime_done = True; continue     # 加赛最后一轮（整轮打满）
-            # ---- 比总和阶段 ----
-            if sum_phase_mode == 'proposed':
-                zy = []
-                for seat in range(players):
-                    roll = next(rolls); n_rolls += 1
+            # ---- 比总和阶段：纸面"每人再掷一次"为一掷两用 ----
+            # proposed：那一掷先判状元，有人掷出按第三节比；
+            # 都未掷出则比同一掷的六颗总和，总和相同者才再掷。
+            sums = []; zy = []
+            for seat in range(players):
+                roll = next(rolls); n_rolls += 1
+                if sum_phase_mode == 'proposed':
                     cat, tier, key = classify(roll)
                     if cat == 'Z':
                         seq += 1; zy.append((ZY_RANK[tier], key, seq, seat))
-                if zy:
-                    best = zy[0]
-                    for cand in zy[1:]:
-                        if zy_beats(cand, best): best = cand
-                    return dict(end='path3_状元骰面', winner=best[3], leader=best,
-                                stock=stock, claimed=claimed, n_rolls=n_rolls, log=log)
-            sums = []
-            for seat in range(players):
-                roll = next(rolls); n_rolls += 1
                 sums.append((sum(roll), seat))
+            if zy:
+                best = zy[0]
+                for cand in zy[1:]:
+                    if zy_beats(cand, best): best = cand
+                return dict(end='path3_状元骰面', winner=best[3], leader=best,
+                            stock=stock, claimed=claimed, n_rolls=n_rolls, log=log)
             while True:                            # 总和相同者再掷，直至分出
                 top = max(s for s, _ in sums)
                 tied = [seat for s, seat in sums if s == top]
@@ -215,7 +216,7 @@ def scenario_tests():
     # K. 比总和阶段的规格缺口
     seq_k = [(1,1,2,2,3,3)]*4 + [(4,4,4,4,2,6), (6,6,6,5,5,5)]
     g = run_game(feed(seq_k), start_stock=empty, players=2, sum_phase_mode='literal')
-    t("K1 字面规则：真状元(总和20)输给普通骰(总和33)——荒谬，暴露缺口",
+    t("K1 字面规则：真状元(总和24)输给普通骰(总和33)——荒谬，暴露缺口",
       g['end'] == 'path3_比总和' and g['winner'] == 1)
     g = run_game(feed(seq_k), start_stock=empty, players=2, sum_phase_mode='proposed')
     t("K2 拟修订：状元骰面按第三节计，444426 获胜", g['end'] == 'path3_状元骰面' and g['winner'] == 0)
@@ -225,10 +226,17 @@ def scenario_tests():
     seq_zy2 = [(1,1,2,2,3,3)]*4 + [(4,4,4,4,6,6), (4,4,4,4,2,3)]
     g = run_game(feed(seq_zy2), start_stock=empty, players=2, sum_phase_mode='proposed')
     t("K4 比总和阶段两个状元按第三节比", g['end'] == 'path3_状元骰面' and g['winner'] == 0)
+    # K5. 比总和用"每人再掷一次"的同一掷（33 对 10），不再另掷一轮；
+    # 若实现回退成两掷，后两记骰面会反过来让 1 号位获胜，本剧本即失败。
+    seq_same = [(1,1,2,2,3,3)]*4 + [(6,6,6,6,5,5), (2,2,2,2,1,1),
+                                 (2,2,2,2,1,1), (6,6,6,6,5,5)]
+    g = run_game(feed(seq_same), start_stock=empty, players=2, sum_phase_mode='proposed')
+    t("K5 比总和用同一掷，不再另掷", g['end'] == 'path3_比总和' and g['winner'] == 0
+      and g['n_rolls'] == 6)
     return res
 
 # ---------- 3. 随机整局：不变量 + 终止性 ----------
-def random_games(n=10000, players=8, seed=2026, sum_phase_mode='literal'):
+def random_games(n=10000, players=8, seed=2026, sum_phase_mode='proposed'):
     rng = random.Random(seed)
     ends = Counter(); max_r = 0
     for _ in range(n):
@@ -252,7 +260,8 @@ if __name__ == '__main__':
         print(f"    [{'通过' if ok else '失败'}] {name}")
     print(f"[2] 确定性剧本 {len(res)} 项，失败 {len(fails)} 项")
 
-    ends, max_r = random_games()
+    # 默认 sum_phase_mode='proposed'（现行条款）；'literal' 为修订前对照，显式指定。
+    ends, max_r = random_games(sum_phase_mode='literal')
     print(f"[3] 字面规则随机 10000 局全部终止（最长 {max_r} 掷），路径分布 {dict(ends)}")
     ends2, max_r2 = random_games(seed=77, sum_phase_mode='proposed')
     print(f"[4] 拟修订规则随机 10000 局全部终止（最长 {max_r2} 掷），路径分布 {dict(ends2)}")
