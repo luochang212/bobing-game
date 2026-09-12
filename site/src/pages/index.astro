@@ -1,4 +1,6 @@
 ---
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import Roll from '../components/Roll.astro';
@@ -6,25 +8,26 @@ import { ArrowUpRight, Download } from 'lucide-astro';
 import bowl from '../assets/porcelain-bowl.png';
 
 const pdf = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}rules-paper.pdf`;
-// 规则与示例均来自根目录 LaTeX 源稿；这里只负责讲解与展示。
-const prizes = [
-  { id: 'zhuangyuan', name: '状元', count: 1, faces: [4,4,4,4,2,6], condition: '至少 4 颗四点，或 5 颗以上同点。' },
-  { id: 'duitang', name: '对堂', count: 2, faces: [1,2,3,4,5,6], condition: '1、2、3、4、5、6，各有 1 颗。' },
-  { id: 'sanhong', name: '三红', count: 4, faces: [4,4,4,1,2,5], condition: '恰有 3 颗四点。' },
-  { id: 'sijin', name: '四进', count: 8, faces: [2,2,2,2,4,6], condition: '恰有 4 颗同点，且该点数不是 4。' },
-  { id: 'erju', name: '二举', count: 16, faces: [4,4,1,2,5,6], condition: '恰有 2 颗四点。' },
-  { id: 'yixiu', name: '一秀', count: 32, faces: [4,1,1,2,3,5], condition: '恰有 1 颗四点。' },
-];
-const ranks = [
-  { name: '状元插金花', faces: [4,4,4,4,1,1], rule: '4 颗四点＋2 颗一点', compare: '本场最高' },
-  { name: '六红', faces: [4,4,4,4,4,4], rule: '6 颗四点', compare: '同级先得者保留' },
-  { name: '六同', faces: [2,2,2,2,2,2], rule: '6 颗同点，非四点，含六个 1', compare: '不同点数的六同彼此同级' },
-  { name: '五红', faces: [4,4,4,4,4,6], rule: '恰有 5 颗四点', compare: '比剩余 1 颗，大者胜' },
-  { name: '五子登科', faces: [2,2,2,2,2,6], rule: '恰有 5 颗同点，非四点', compare: '只比剩余 1 颗，大者胜' },
-  { name: '四红', faces: [4,4,4,4,2,6], rule: '恰有 4 颗四点，排除插金花', compare: '比另 2 颗之和，大者胜' },
-];
+// 讲解页按仓库根的 current 指针渲染对应版本；文案随版本自含于 versions/<名>/site-data.json，
+// 规则语义仍以该版本 rules-paper.tex 为准，这里只负责讲解与展示。
+// 预渲染打包后 import.meta.url 不再指向源码位置，改从 cwd 向上找含 current 与 versions/ 的目录。
+function findRepoRoot(start) {
+  let dir = path.resolve(start);
+  for (let i = 0; i < 6; i++) {
+    if (existsSync(path.join(dir, 'current')) && existsSync(path.join(dir, 'versions'))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  throw new Error('找不到仓库根（应含 current 文件与 versions/ 目录）');
+}
+const repoRoot = findRepoRoot(process.cwd());
+const current = readFileSync(path.join(repoRoot, 'current'), 'utf-8').trim();
+const data = JSON.parse(readFileSync(path.join(repoRoot, 'versions', current, 'site-data.json'), 'utf-8'));
+const prizes = data.prizes.items;
+const ranks = data.champion.ranks;
 ---
-<Layout title="中秋博饼规则 · 一起博个好彩头" description="六颗骰子，一碗好运。中秋博饼本次活动统一版：快速开局、奖级查询、状元比较与 A4 黑白规则纸下载。以现场纸质规则为准。">
+<Layout title={data.meta.title} description={data.meta.description}>
   <header class="site-header shell">
     <a href="#" class="brand" aria-label="中秋博饼，回到顶部"><span class="brand-die" aria-hidden="true">四</span><span>中秋博饼</span></a>
     <a class="header-download" href={pdf} download>规则纸 PDF <Download aria-hidden="true" /></a>
@@ -32,9 +35,9 @@ const ranks = [
 
   <section class="hero shell" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <h1 id="hero-title">中秋博饼规则</h1>
-      <p class="hero-description">一桌人轮流掷骰，领走普通奖，最后决出状元。</p>
-      <p class="edition">本次活动统一版 · 以现场纸质规则为准</p>
+      <h1 id="hero-title">{data.hero.title}</h1>
+      <p class="hero-description">{data.hero.description}</p>
+      <p class="edition">{data.hero.edition}</p>
     </div>
     <figure class="hero-art">
       <Image src={bowl} alt="花纹白瓷碗中的六颗骰子" width={400} widths={[160,400,800]} sizes="(max-width: 700px) 96px, 280px" format="webp" loading="eager" fetchpriority="high" />
@@ -49,39 +52,33 @@ const ranks = [
 
   <main id="main" class="shell reading-content">
     <section id="overview" class="overview-section" aria-labelledby="overview-title">
-      <div class="section-heading"><h2 id="overview-title">先看懂，这一桌在玩什么</h2></div>
+      <div class="section-heading"><h2 id="overview-title">{data.overview.title}</h2></div>
       <div class="game-intro prose">
-        <p>一桌人围着一个大碗，轮流把六颗骰子掷进去。骰子停下来，看它们凑成了什么组合，再按组合领奖。这就是博饼。</p>
-        <p>本场每桌有 <strong>63 份奖品</strong>，分两种发法：<strong>62 份普通奖，掷中就领；1 份状元奖，先记谁领先，结束时再发。</strong></p>
+        <Fragment set:html={data.overview.intro.join('\n')} />
       </div>
       <ol class="game-route" aria-label="一局的三个阶段">
-        <li><span>1</span><div><h3>摆好奖品，定好顺序</h3><p>选出首位玩家和记录员，就能开局。</p></div></li>
-        <li><span>2</span><div><h3>轮流掷骰，领奖或记名</h3><p>一人掷完交给下一位，大家一轮轮继续。</p></div></li>
-        <li><span>3</span><div><h3>普通奖发完，补轮定状元</h3><p>先补完当前一轮；仍无人博到状元，再按收尾规则加赛。</p></div></li>
+        {data.overview.route.map((step, index) => <li><span>{index + 1}</span><div><h3>{step.title}</h3><p>{step.text}</p></div></li>)}
       </ol>
-      <p class="section-bridge">这三个阶段里，反复发生的是中间一段：轮到谁，谁掷一次。</p>
+      <p class="section-bridge">{data.overview.bridge}</p>
     </section>
 
     <section id="start" class="start-section" aria-labelledby="start-title">
-      <div class="section-heading"><h2 id="start-title">顺序定好，轮到谁谁掷</h2></div>
+      <div class="section-heading"><h2 id="start-title">{data.start.title}</h2></div>
       <div class="prose">
-        <p>开局前，每桌备好六颗骰子、一个大碗和一张规则纸，把 63 份奖品按下面的六档摆好。指定首位玩家，再由一位玩家兼任记录员。</p>
-        <p>大家<strong>顺时针轮流，掷完传左手边</strong>。从首位玩家开始，每个人都掷过一次，才算一轮。后面说的“补完当前一轮”，就是要让这一轮还没掷的人掷完。</p>
+        <Fragment set:html={data.start.intro.join('\n')} />
       </div>
-      <h3 class="subheading">轮到你时，做这三件事</h3>
+      <h3 class="subheading">{data.start.subheading}</h3>
       <ol class="steps">
-        <li><span class="step-number">1</span><div><h3>六颗一起掷入碗</h3><p>一次把六颗骰子全部掷入碗中。</p></div></li>
-        <li><span class="step-number">2</span><div><h3>停稳以后，再看点数</h3><p>看朝上的六颗点数。大家确认前，先别碰骰子。</p></div></li>
-        <li><span class="step-number">3</span><div><h3>查奖、领奖，再交给下一位</h3><p>普通奖有货领 1 份；状元只记名次。未中奖也换下一位，不连掷。</p></div></li>
+        {data.start.steps.map((step, index) => <li><span class="step-number">{index + 1}</span><div><h3>{step.title}</h3><p>{step.text}</p></div></li>)}
       </ol>
-      <p class="throw-help">骰子出了碗，或点数看不清时，看看下面的<a href="#questions">小提醒</a>。</p>
-      <p class="section-bridge">六颗点数都能看清了，怎么知道中了什么？要把它们放在一起，看组成了哪一种组合。</p>
+      <p class="throw-help"><Fragment set:html={data.start.throwHelp} /></p>
+      <p class="section-bridge">{data.start.bridge}</p>
     </section>
 
     <section id="prizes" class="prizes-section" aria-labelledby="prizes-title">
-      <div class="section-heading"><h2 id="prizes-title">骰子停下了，这一掷领什么？</h2></div>
-      <div class="prose section-lead"><p>拿自己的六颗点数，从下面<strong>最高的奖级往下找，找到第一个符合条件的就停</strong>。这一掷只按这一档处理，不兼领其他奖。</p></div>
-      <p class="dice-guide"><span class="mini-four">4</span> 黑底「4」是四点，俗称“红四”。下方骰面只是一组示例，排列顺序不限，<strong>以文字条件为准</strong>。</p>
+      <div class="section-heading"><h2 id="prizes-title">{data.prizes.title}</h2></div>
+      <div class="prose section-lead"><Fragment set:html={data.prizes.lead} /></div>
+      <p class="dice-guide"><Fragment set:html={data.prizes.diceGuide} /></p>
       <div class="prize-list">
         {prizes.map(prize => <article class="prize-card" id={`prize-${prize.id}`} aria-labelledby={`title-${prize.id}`}>
           <div class="prize-card-heading"><h3 id={`title-${prize.id}`}>{prize.name}</h3><span>{prize.id === 'zhuangyuan' ? '状元奖' : '普通奖'}，{prize.count} 份</span></div>
@@ -90,36 +87,34 @@ const ranks = [
           {prize.id === 'zhuangyuan' && <a class="prize-rank-link" href="#champion">博到状元后，查看六个等级怎么比</a>}
         </article>)}
       </div>
-      <div class="worked-example"><h3>拿这一掷看一遍，就容易明白了</h3><Roll faces={[2,2,2,2,4,4]} /><div class="prose"><p>四颗二点，符合四进；两颗四点，也符合二举。往上找，四进排在二举前面，所以<strong>只算四进，不另领二举</strong>。</p><p>如果四进已经发完了呢？这一掷就空过，<strong>也不改领二举</strong>。确定了奖级，就只看这一档还有没有奖品。</p></div></div>
-      <p class="rule-callout">普通奖有货，每次领 1 份；所掷奖级发完就空过，不降档。普通奖领走后不追回，未列出的组合不中奖。</p>
-      <p class="section-bridge">普通奖这样一份份领走。状元虽然也在奖级表里，发奖时间却要留到整局结束。</p>
+      <div class="worked-example"><h3>{data.prizes.workedExample.title}</h3><Roll faces={data.prizes.workedExample.faces} /><div class="prose"><Fragment set:html={data.prizes.workedExample.paragraphs.join('\n')} /></div></div>
+      <p class="rule-callout">{data.prizes.callout}</p>
+      <p class="section-bridge">{data.prizes.bridge}</p>
     </section>
 
     <section id="champion" class="champion-section" aria-labelledby="champion-title">
-      <div class="champion-heading"><h2 id="champion-title">状元为什么不当场发奖？</h2><div class="prose champion-description"><p>因为后面的人，还可能掷出更好的状元骰面。先掷中的人暂时领先，有人超过他，记录员就更新领先者。</p><p>所以，掷中状元时<strong>只记名次，不领普通奖</strong>。每人只记自己的最好成绩，状元奖留在桌上，结束时颁给最后确定的得主，不兼奖、不通吃。</p><p>怎么判断谁更好？<strong>先比等级，再比点数。</strong>下面六种状元，越靠前等级越高；同级时，再按各等级的说明比较。</p></div></div>
-      <div class="rank-list"><p class="rank-list-caption">本场状元等级，由高到低</p>{ranks.map((rank,index) => <div class:list={['rank-row',{'rank-first':index===0}]}><div class="rank-name"><h3>{rank.name}</h3><p>{rank.rule}</p></div><div class="rank-example"><Roll faces={rank.faces}/><p>{rank.compare}</p></div></div>)}</div>
-      <div class="prose comparison-example"><p>比如，五红带 6 点，仍然胜过四红带 8 点。虽然 6 比 8 小，但五红的等级更高，先看等级就已经分出了高低。</p><p><strong>等级和需要比较的点数都相同，先得者保留。</strong>六同里的不同点数彼此同级，也按这条处理。</p></div>
-      <p class="section-bridge">有人暂时领先，其他人仍照常轮流掷。什么时候停下来，把状元奖真正发出去？</p>
+      <div class="champion-heading"><h2 id="champion-title">{data.champion.title}</h2><div class="prose champion-description"><Fragment set:html={data.champion.description.join('\n')} /></div></div>
+      <div class="rank-list"><p class="rank-list-caption">{data.champion.caption}</p>{ranks.map((rank,index) => <div class:list={['rank-row',{'rank-first':index===0}]}><div class="rank-name"><h3>{rank.name}</h3><p>{rank.rule}</p></div><div class="rank-example"><Roll faces={rank.faces}/><p>{rank.compare}</p></div></div>)}</div>
+      <div class="prose comparison-example"><Fragment set:html={data.champion.comparisonExample.join('\n')} /></div>
+      <p class="section-bridge">{data.champion.bridge}</p>
     </section>
 
     <section id="ending" class="ending-section" aria-labelledby="ending-title">
-      <div class="section-heading"><h2 id="ending-title">普通奖发完，把这一局收好</h2></div>
-      <div class="prose section-lead"><p>大家就这样一轮轮掷，普通奖逐渐领完。<strong>当第 62 份普通奖被领走，先把当前这一轮掷完，再定状元。</strong>这一轮里，仍可能有人反超。</p></div>
+      <div class="section-heading"><h2 id="ending-title">{data.ending.title}</h2></div>
+      <div class="prose section-lead"><Fragment set:html={data.ending.lead} /></div>
       <ol class="ending-steps">
-        <li><span>1</span><h3>先补完当前一轮</h3><p>继续按顺序掷，到首位玩家的前一位掷完为止。有状元领先者，就把状元奖颁给他，游戏结束。</p></li>
-        <li><span>2</span><h3>无人博到，加赛一轮</h3><p>仍无人博到状元，就加赛最后一轮，每人都掷一次。本轮有人博到，整轮掷完后按状元比较规则定名次并发奖。</p></li>
-        <li><span>3</span><h3>仍无人博到，每人加掷</h3><p>加赛后仍无人博到状元，每人再掷一次。有人掷出状元，按上面的等级、带点和先得规则比较；都未掷出，才比六颗点数总和，最大者得状元奖。总和相同者再掷，直至分出。</p></li>
+        {data.ending.steps.map((step, index) => <li><span>{index + 1}</span><h3>{step.title}</h3><p>{step.text}</p></li>)}
       </ol>
+      {data.ending.extraCallout && <p class="rule-callout">{data.ending.extraCallout}</p>}
     </section>
 
     <section id="questions" class="questions-section" aria-labelledby="questions-title">
-      <div class="section-heading"><h2 id="questions-title">掷骰时，还有两个小提醒</h2></div>
+      <div class="section-heading"><h2 id="questions-title">{data.questions.title}</h2></div>
       <div class="exception-list">
-        <article><h3>有一颗出了碗</h3><p><strong>这一掷就不计，换下一位。</strong>任何一颗未入碗或跳出碗，都不重掷。</p></article>
-        <article><h3>都在碗里，但点数看不清</h3><p>叠在一起或斜着立住、看不清点数时，请同桌确认，<strong>再把六颗一起重掷</strong>。</p></article>
+        {data.questions.exceptions.map(item => <article><h3>{item.title}</h3><p><Fragment set:html={item.text} /></p></article>)}
       </div>
       <div class="faq-list">
-        <details><summary>和我以前玩的规则不一样？<span aria-hidden="true">+</span></summary><p>各地博饼习俗略有不同。这里的排序、兼奖、平局和结束方式，均为本次活动约定，以现场纸质规则为准。</p></details>
+        {data.questions.faq.map(item => <details><summary>{item.q}<span aria-hidden="true">+</span></summary><p>{item.a}</p></details>)}
       </div>
     </section>
 
