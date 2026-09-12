@@ -107,115 +107,15 @@ flowchart TD
 
 <a id="本地开发"></a>
 
-## 🛠️ 本地开发
+## 🔧 本地开发
 
-直接使用规则纸可下载现成 PDF。需要修改排版或网页时，再准备对应的开发环境。
+直接使用规则纸可下载现成 PDF，无需准备开发环境。想自己动手时，三个环节各只需一条命令：
 
-| 用途 | 技术与依赖 |
-| --- | --- |
-| 规则纸排版 | LaTeX、MacTeX（latexmk + XeLaTeX）、macOS 字体 |
-| 讲解网页 | Astro、Tailwind CSS、Node.js 与 npm |
-| 规则验证 | Python 3，仅依赖标准库 |
-| PDF 预览与二维码核查 | Poppler、Python 3 + Pillow / ZXing-C++ |
-| 网页回归检查 | Python 3 + Playwright（Chromium / WebKit） |
-| 自动检查与部署 | GitHub Actions、Poppler、GitHub Pages |
+- **编译规则纸**：仓库根目录运行 `make pdf`，依赖 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）。
+- **启动讲解网页**：在 `site/` 目录运行 `npm install && npm run dev`，技术栈为 Astro + Tailwind。
+- **机器验证**：仓库根目录运行 `python3 verify/状态机验证.py`，仅依赖 Python 3 标准库。
 
-### 编译规则纸
-
-在仓库根目录运行：
-
-```sh
-make pdf
-```
-
-依赖 macOS 字体 **Songti SC / Hiragino Sans GB**。编译中间产物集中在 `build/`，最终 PDF 输出到 [`output/pdf/博饼规则-A4黑白.pdf`](output/pdf/博饼规则-A4黑白.pdf)。
-
-<details>
-<summary>找不到 TeX 命令？</summary>
-
-安装 MacTeX 后，将工具目录加入当前终端的 PATH，再编译：
-
-```sh
-export PATH="/Library/TeX/texbin:$PATH"
-make pdf
-```
-
-本稿使用 XeLaTeX，pdfLaTeX 不支持当前字体设置。请统一通过 `make pdf` 编译。
-
-</details>
-
-### 生成预览与核查二维码
-
-二维码地址直接写在 TeX 的 `\qrcode` 命令中，由 MacTeX 自带宏包生成矢量图。改地址后运行 `make pdf`，再用[输出验证脚本](verify/规则纸输出验证.py)检查并更新预览。
-
-首次准备核查环境：
-
-```sh
-brew install poppler
-python3 -m venv tmp/pdf-tools
-tmp/pdf-tools/bin/pip install pillow zxing-cpp
-```
-
-每次编译后运行：
-
-```sh
-tmp/pdf-tools/bin/python verify/规则纸输出验证.py --preview-output docs/preview.png
-```
-
-脚本检查单页与 806pt 底部安全线，在 `tmp/pdf-review/` 生成提取文字及 100、150、300 DPI 图片，并逐张解码二维码，核对目标地址。全部通过后才更新 README 预览。纯排版修改时可附加 `--compare-ref <提交号>`，对照该版本的规则正文；更换网址时同时传入 `--url <新地址>`。核查依赖不参与 PDF 编译。
-
-### 启动讲解网页
-
-```sh
-cd site
-npm install
-npm run dev
-```
-
-打开终端显示的本地地址，访问 `/bobing-game/` 路径。构建与预览：
-
-```sh
-npm run build
-npm run preview
-```
-
-产物位于 `site/dist/`。[部署工作流](.github/workflows/site.yml) 配置为在 `main` 分支的 `site/**` 或工作流文件变化时部署到 GitHub Pages，也支持手动触发，线上地址为 [www.luochang.ink/bobing-game](https://www.luochang.ink/bobing-game/)。部署时会将规则纸复制为 `rules-paper.pdf`；本地预览构建产物时，如需使用页面上的 PDF 下载入口，可先在 `site/` 目录执行：
-
-```sh
-cp ../output/pdf/博饼规则-A4黑白.pdf dist/rules-paper.pdf
-```
-
-## ✅ 机器验证
-
-在仓库根目录运行：
-
-```sh
-python3 verify/状态机验证.py
-```
-
-| 检查层级 | 覆盖内容 |
-| --- | --- |
-| 全枚举 | 46656 种骰面归类 |
-| 确定性剧本 | 20 项，覆盖奖品发完、状元比较、先得者保留、补轮反超与结束边界 |
-| 随机整局 | 修订前对照与现行结束条款各 10000 局，检查终止情况、库存守恒与路径分布 |
-
-<details>
-<summary>查看验证输出节选</summary>
-
-```text
-[1] 全枚举 46656 种骰面归类唯一、无遗漏 ✓
-[2] 确定性剧本 20 项，失败 0 项
-[3] 字面规则随机 10000 局全部终止
-[4] 拟修订规则随机 10000 局全部终止
-```
-
-脚本保留历史命名：`sum_phase_mode='proposed'` 对应规则纸现行结束条款，`literal` 为修订前对照。随机模拟全部结束是观测结果；普通奖阶段和总和同分重掷为概率 1 终止，不保证固定掷骰次数内结束。
-
-</details>
-
-[验证工作流](.github/workflows/verify.yml) 在推送到 `main` 和提交 PR 时运行状态机检查，并用 Poppler 检查已提交 PDF 的单页与版面红线。PDF 编译依赖本机字体，仍需在本机完成。
-
-手机阅读体验另有[核查记录与浏览器回归检查](docs/移动端阅读核查.md)，覆盖首屏玩法、规则字号、目录跳转与无脚本阅读。
+依赖安装、预览与二维码核查、构建部署等完整步骤，见 [docs/本地开发与机器验证.md](docs/本地开发与机器验证.md)。
 
 ## 📂 项目结构
 
@@ -228,6 +128,7 @@ python3 verify/状态机验证.py
 | [verify/规则纸输出验证.py](verify/规则纸输出验证.py) | PDF 单页、底部安全线、预览渲染与二维码解码核查 |
 | [verify/网页阅读验证.py](verify/网页阅读验证.py) | 讲解页浏览器回归检查（Playwright，七种视口 × 两引擎） |
 | [docs/规则核查.md](docs/规则核查.md) | 资料来源、修订原因与验证记录 |
+| [docs/本地开发与机器验证.md](docs/本地开发与机器验证.md) | 编译、预览核查、网页开发与机器验证的运行手册 |
 | [docs/assets/](docs/assets/) / [docs/preview.png](docs/preview.png) | README 头图与规则纸预览 |
 | [Makefile](Makefile) / [.latexmkrc](.latexmkrc) | 编译配置，中间产物集中到 `build/` |
 | [.github/workflows/](.github/workflows/) | 规则检查与网页部署 |
@@ -241,7 +142,7 @@ python3 verify/状态机验证.py
 
 1. 修改 LaTeX 源稿，并同步状态机与受影响的验证剧本。
 2. 在 `docs/规则核查.md` 记录修改原因；更新受影响的 README 流程图与网页举例。
-3. 运行 `make pdf` 和完整验证，确认 PDF 仍为 **1 页**，内容最低点 **yMax ≤ 806pt**，并抽查 PDF 中的新措辞。
+3. 运行 `make pdf` 和[完整验证](docs/本地开发与机器验证.md#机器验证)，确认 PDF 仍为 **1 页**，内容最低点 **yMax ≤ 806pt**，并抽查 PDF 中的新措辞。
 
 规则纸保持黑白灰阶与单页约束，新增内容前先看 [AGENTS.md](AGENTS.md) 的版面约定。
 

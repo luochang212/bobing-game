@@ -13,11 +13,13 @@ PDF 由源稿编译生成，Python 脚本对规则文字做机器验证，docs �
 - `verify/网页阅读验证.py`：讲解页的浏览器回归检查（七种视口 × Chromium/WebKit、
   目录跳转、无脚本阅读），依赖 Playwright，运行方式见 `docs/移动端阅读核查.md`。
 - `verify/规则纸输出验证.py`：检查 PDF 单页与底部安全线，渲染三档清晰度并解码
-  二维码，可更新 `docs/preview.png`；依赖与命令见 README。
+  二维码，可更新 `docs/preview.png`；依赖与命令见 `docs/本地开发与机器验证.md`。
 - `docs/规则核查.md`：决策与证据的留痕——资料来源、每处修订的原因、已知规格空白。
   改规则必须同步补记。
 - `docs/移动端阅读核查.md`：网页阅读体验的核查记录——两轮修订的判断依据与
   可重复检查命令。
+- `docs/本地开发与机器验证.md`：编译规则纸、预览与二维码核查、讲解网页本地开发
+  与机器验证的运行手册；README 简述各环节并链接过去。
 - `README.md`：使用说明 + 游戏流程 mermaid 图（与脚本实现一一对应）。
 - `site/`：讲解版网页（Astro + Tailwind，部署到 GitHub Pages，workflow 为
   `.github/workflows/site.yml`）。定位是"解释与举例"，不是第二份规则权威源：
