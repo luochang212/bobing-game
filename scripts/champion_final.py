@@ -8,8 +8,8 @@
 模型：players 名桌状元围一桌轮流掷骰——
   - 每掷当场与全场最好成绩比较：严格更优（等级→带点）则取代为领先，
     挑战窗口重置为"其他每人各掷一次"；等级与带点相同，先掷出者保留；
-  - 挑战窗口耗尽（领先确立后其他每人各掷一次而无人超越）→ 封盘，
-    领先者当选；
+  - 挑战窗口耗尽（领先确立后其他每人各掷一次——含未超越的状元掷——而无人
+    超越）→ 封盘，领先者当选；
   - 兜底：连续 dry_rounds 轮无任何状元 → 每人加掷一次（一掷两用）：
     有状元按比较分出名次；都未掷出比六颗点数总和，同和者再掷直至分出。
 
@@ -37,20 +37,24 @@ def run_final(rolls, players=14, max_rolls=5000, dry_rounds=10):
         roll = next(rolls); n_rolls += 1
         assert n_rolls < max_rolls, "游戏未终止！"
         cat, tier, key = classify(roll)
+        took_lead = False
         if cat == 'Z':
             seq += 1
             cand = (ZY_RANK[tier], key, seq, seat)
-            if leader is None or zy_beats(cand, leader):
+            took_lead = leader is None or zy_beats(cand, leader)
+            if took_lead:
                 leader = cand
                 window = players - 1      # 新领先需被其他每人各挑战一次
-            log.append(('Z', tier, seat, roll))
+        log.append(('Z' if cat == 'Z' else '-', tier, seat, roll))
+        if took_lead:
             return 'z'
-        log.append(('-', tier, seat, roll))
+        # 未超越的状元同样是"其他每位各掷一次"中的一掷，照常消耗挑战窗口；
+        # 领先者本人的掷骰（seat == leader[3]，含更差状元）不消耗。
         if leader is not None and seat != leader[3]:
             window -= 1
             if window == 0:
                 return 'sealed'
-        return None
+        return 'z' if cat == 'Z' else None
 
     while True:
         z_count = 0
@@ -108,7 +112,8 @@ def scenario_tests():
 
     # M3. 同级同点：先掷出者保留，挑战掷数照常消耗
     g = run_final(feed([(4,4,4,4,2,3), (4,4,4,4,2,3)]), players=3)
-    t("M3 同级同点先得者保留", g['end'] == 'sealed' and g['winner'] == 0)
+    t("M3 同级同点先得者保留", g['end'] == 'sealed' and g['winner'] == 0
+      and g['n_rolls'] == 3)
 
     # M4. 领先者自我刷新：更好的状元重置挑战窗口
     g = run_final(feed([(4,4,4,4,2,3), NOTHING, (4,4,4,4,6,6)]), players=3)
@@ -131,6 +136,12 @@ def scenario_tests():
                         (4,4,4,4,1,1), (2,2,2,2,1,1)]), players=2, dry_rounds=1)
     t("M7 同和再掷直至分出", g['end'] == 'shootout_sum' and g['winner'] == 0
       and g['n_rolls'] == 6)
+
+    # M8. 未超越的状元照常消耗挑战窗口（纸面"其他每位各掷一次"）：
+    # 1 号四红带5（状元、未超越）计入其挑战掷 → 3 掷封盘而非 5 掷
+    g = run_final(feed([(4,4,4,4,6,6), (4,4,4,4,2,3)]), players=3)
+    t("M8 未超越的状元消耗窗口", g['end'] == 'sealed' and g['winner'] == 0
+      and g['n_rolls'] == 3)
     return res
 
 

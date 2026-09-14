@@ -205,16 +205,18 @@ def scenario_tests():
                  players=1, stop_after_rounds=1)
     t("F 六同同级先得者保留", g['leader'][3] == 3)
 
-    # G. 本场排序：插金花胜五红；六红胜插金花；六同不胜六红
+    # G. 本场排序：插金花胜五红；插金花胜六红；六同不胜六红
+    # （现任领先者放 1 号位、挑战者在 0 号位，断言才区分"夺位/保位"；
+    #   若两人同座，leader[3] 断言恒真，排序被改坏也不会红。）
     g = run_game(feed([(4,4,4,4,1,1)]), start_leader=(ZY_RANK['五红'], 6, 1, 0),
                  players=1, stop_after_rounds=1)
     t("G1 插金花最高", g['leader'][0] == ZY_RANK['插金花'])
-    g = run_game(feed([(4,4,4,4,1,1)]), start_leader=(ZY_RANK['六红'], None, 1, 0),
-                 players=1, stop_after_rounds=1)
-    t("G2 六红胜插金花", g['leader'][3] == 0)
-    g = run_game(feed([(2,2,2,2,2,2)]), start_leader=(ZY_RANK['六红'], None, 1, 0),
-                 players=1, stop_after_rounds=1)
-    t("G3 六同不胜六红", g['leader'][3] == 0)
+    g = run_game(feed([(4,4,4,4,1,1)]), start_leader=(ZY_RANK['六红'], None, 1, 1),
+                 players=2, stop_after_rounds=1)
+    t("G2 插金花胜六红", g['leader'][3] == 0)
+    g = run_game(feed([(2,2,2,2,2,2)]), start_leader=(ZY_RANK['六红'], None, 1, 1),
+                 players=2, stop_after_rounds=1)
+    t("G3 六同不胜六红", g['leader'][3] == 1)
 
     # H. 每人只记本人最好成绩
     lead = None; seq = 0

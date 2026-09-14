@@ -129,7 +129,7 @@ tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐
 
 1. `ruff check scripts/` 全绿（需 `pip install ruff`；配置见 `.ruff.toml`，CI 同步执行）；
 2. `python3 scripts/state_machine.py` 全绿（归类唯一、tiered 20 剧本＋pooled 5 剧本、三组随机）；
-3. `python3 scripts/champion_final.py` 全绿（加赛 7 剧本、随机整局）；
+3. `python3 scripts/champion_final.py` 全绿（加赛 8 剧本、随机整局）；
 4. `python3 scripts/version_consistency.py` 全绿（同族整段、跨族共识块、状元等级表跨件、site-data 两档）；
 5. 两份交付 PDF 均 1 页、yMax ≤ 806；桌内 PDF 含当前版本 README 声明的特征句，
    加赛纸 PDF 含其 README 声明的特征句；`pdftotext` 抽查确认新措辞已写入；
