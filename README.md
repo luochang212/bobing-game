@@ -35,7 +35,7 @@
 
 ## 🚀 快速开始
 
-1. 下载 [博饼规则 PDF](output/pdf/rules-paper.pdf)，按 **A4 纵向、实际大小（100%）、黑白** 打印。多桌活动要决出全场"状元王"时，另印一张[状元王加赛规则](output/pdf/champion-final.pdf)交给决赛桌即可——每桌规则纸不含状元王内容。
+1. 下载 [博饼规则 PDF](output/pdf/rules-paper.pdf)，按 **A4 纵向、实际大小（100%）、黑白** 打印。多桌活动要决出全场"状元王"时，另印一张[状元王加赛规则](output/pdf/champion-final.pdf)交给决赛桌即可（该 PDF 与加赛网页仅仓库 `scope=multi` 时在交付内）——每桌规则纸不含状元王内容。
 2. 每桌准备以下物料，按六档摆好奖品。
 3. 指定首位玩家，由一位玩家兼任记录员。顺时针轮流掷骰，掷完传左手边。
 
@@ -111,20 +111,20 @@ flowchart TD
 
 ## 🧭 版本
 
-规则纸按活动场景分版本维护：仓库根的 `current` 指针决定 `make pdf` 编译哪个版本、网站渲染哪个版本，`output/pdf/rules-paper.pdf` 永远是当前版本。每个版本自含完整源稿（不做共享模板），各版本必须一致的规则段落由 CI 强制比对。**状元王加赛是独立的一张纸**（[champion-final](champion-final/)），不属于任何版本——它只服务决赛桌，与奖品模型无关，一张通用于所有版本。
+规则纸按奖品模型分版本维护，活动场景由另一指针表达：仓库根的 `current` 决定 `make pdf` 编译哪个版本、网站渲染哪个版本，`scope`（一行 `single`/`multi`）决定加赛物料是否属于交付——单桌一份纸一个网页，多桌另含加赛纸与加赛网页，`output/pdf/rules-paper.pdf` 永远是当前版本。每个版本自含完整源稿（不做共享模板），各版本必须一致的规则段落由 CI 强制比对。**状元王加赛是独立的一张纸**（[champion-final](champion-final/)），不属于任何版本——它只服务决赛桌，与奖品模型无关，一张通用于所有版本，仅多桌场景随交付。
 
 | 版本 | 定位 |
 | --- | --- |
 | [classic](versions/classic/) | 标准 63 份：固定奖品六档，单桌多桌通用 |
 | [flexible](versions/flexible/) | 灵活奖品：奖品若干、先留 1 份作状元奖，单桌多桌通用 |
 
-当前编译与网站渲染哪个版本，由仓库根 `current` 指针决定（内容一行版本名），本表刻意不固定标注：切换只需把 `current` 改为目标版本、`make pdf` 后提交，网站随部署自动更新。新增版本的要求见 [AGENTS.md](AGENTS.md) 的版本模型。
+当前编译与网站渲染哪个版本、本场是单桌还是多桌，由仓库根 `current`（一行版本名）与 `scope`（一行 `single`/`multi`）两个指针决定，本表刻意不固定标注：切换只需改指针、`make pdf` 后提交，网站随部署自动更新（`multi` → `single` 会自动清掉加赛纸交付）。新增版本的要求见 [AGENTS.md](AGENTS.md) 的版本模型。
 
 ## 🔧 本地开发
 
 直接使用规则纸可下载现成 PDF，无需准备开发环境。想自己动手时，各环节只需一条命令：
 
-- **编译规则纸**：仓库根目录运行 `make pdf`（编译 `current` 指向的版本），依赖 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）；`make pdf-final` 编译状元王加赛纸，`make pdf-all` 把全部版本与加赛纸各编一遍供检查。
+- **编译规则纸**：仓库根目录运行 `make pdf`（按 `current`＋`scope` 同步交付：桌内纸必编，多桌连带加赛纸、单桌清残留），依赖 MacTeX 与 macOS 字体（Songti SC / Hiragino Sans GB）；`make pdf-final` 单独编译状元王加赛纸（仅多桌场景），`make pdf-all` 把全部版本与加赛纸各编一遍供检查。
 - **启动讲解网页**：在 `site/` 目录运行 `npm install && npm run dev`，技术栈为 Astro + Tailwind。
 - **机器验证**：仓库根目录运行 `python3 scripts/state_machine.py`、`python3 scripts/champion_final.py` 与 `python3 scripts/version_consistency.py`，均仅依赖 Python 3 标准库。
 
@@ -135,19 +135,20 @@ flowchart TD
 ```text
 .
 ├── current                      # 版本指针：一行版本名，决定编译与网页渲染的版本
+├── scope                        # 场景指针：一行 single/multi，决定加赛物料是否交付
 ├── versions/                    # 桌内规则纸版本仓库（每版自含源稿、说明与网页文案）
 │   ├── classic/                 # 标准 63 份
 │   └── flexible/                # 灵活奖品：若干份，先留 1 份作状元奖
-├── champion-final/              # 状元王加赛纸：独立一张，不随指针变化
+├── champion-final/              # 状元王加赛纸：源稿单一共享，仅 multi 场景随交付
 ├── scripts/                     # 机器验证
 │   ├── state_machine.py         # 桌内规则状态机（tiered / pooled 两种奖品模型）
 │   ├── champion_final.py        # 状元王加赛状态机（封盘、兜底、一掷两用）
 │   ├── version_consistency.py   # 共享内容一致性检查（含跨件状元等级表）
 │   ├── paper_output_check.py    # 交付 PDF 单页、安全线、二维码核查
 │   └── web_reading_check.py     # 讲解页浏览器回归（Playwright，七视口两引擎）
-├── site/                        # 讲解网页：主页随指针渲染，/champion-final/ 固定
+├── site/                        # 讲解网页：主页随 current 渲染，/champion-final/ 随 scope
 ├── docs/                        # 决策留痕（rule-audit）与运行手册
-├── output/pdf/                  # 交付 PDF：桌内纸随指针＋加赛纸固定一张
+├── output/pdf/                  # 交付 PDF：桌内纸随指针，加赛纸仅 multi 场景在场
 ├── Makefile                     # make pdf / pdf-final / pdf-all
 └── AGENTS.md                    # 仓库协作约定（版本模型、四件套、验证标准）
 ```

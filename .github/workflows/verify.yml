@@ -29,10 +29,12 @@ jobs:
       - name: 各版本共享内容一致
         run: python3 scripts/version_consistency.py
 
-      - name: 单页与版面约束（两份交付 PDF）
+      - name: 单页与版面约束（交付 PDF，随场景）
         run: |
           sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
-          for PDF in output/pdf/rules-paper.pdf output/pdf/champion-final.pdf; do
+          PDFS="output/pdf/rules-paper.pdf"
+          if [ "$(cat scope)" = "multi" ]; then PDFS="$PDFS output/pdf/champion-final.pdf"; fi
+          for PDF in $PDFS; do
             pages=$(pdfinfo "$PDF" | awk '/^Pages:/{print $2}')
             echo "$PDF 页数: $pages"
             [ "$pages" = "1" ] || { echo "失败：$PDF 必须为 1 页"; exit 1; }
@@ -67,8 +69,14 @@ jobs:
           done < /tmp/excluded.txt
           echo "桌内交付 PDF 与指针一致：$CURRENT"
 
-      - name: 加赛纸与源稿一致（特征句抽查）
+      - name: 加赛纸与源稿一致（特征句抽查，随场景）
         run: |
+          if [ "$(cat scope)" != "multi" ]; then
+            [ ! -e output/pdf/champion-final.pdf ] \
+              || { echo "失败：scope=single（单桌），但 output/pdf/champion-final.pdf 仍存在——改了 scope 忘同步交付物"; exit 1; }
+            echo "单桌场景：加赛纸不属于交付集合，确认无残留 ✓"
+            exit 0
+          fi
           TEXT=$(pdftotext "output/pdf/champion-final.pdf" - | tr -d '[:space:]')
           sed -n 's/^特征句：//p' champion-final/README.md | sed 's/[[:space:]]//g' | grep -v '^$' > /tmp/final-features.txt || true
           [ -s /tmp/final-features.txt ] || { echo "失败：champion-final/README.md 未声明特征句"; exit 1; }

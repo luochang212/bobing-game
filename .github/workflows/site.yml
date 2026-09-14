@@ -1,11 +1,11 @@
 # 讲解页部署：照搬 adr-kit 的 site.yml 模式。
-# 只在 site/** 或本 workflow 变化时触发；构建产物 = Astro 静态页 + 规则纸 PDF。
+# 站点内容随双指针变化：current（桌内版本）与 scope（单桌/多桌，决定加赛页与加赛纸 PDF 是否部署）。
 name: site
 
 on:
   push:
     branches: [main]
-    paths: ['site/**', 'versions/**', 'champion-final/**', 'current', '.github/workflows/site.yml']
+    paths: ['site/**', 'versions/**', 'champion-final/**', 'current', 'scope', '.github/workflows/site.yml']
   workflow_dispatch:
 
 permissions:
@@ -31,10 +31,16 @@ jobs:
         working-directory: site
       - run: npm run build
         working-directory: site
-      - name: 附上规则纸与加赛纸 PDF
+      - name: 附上规则纸 PDF（加赛纸随场景）
         run: |
           cp output/pdf/rules-paper.pdf site/dist/rules-paper.pdf
-          cp output/pdf/champion-final.pdf site/dist/champion-final.pdf
+          if [ "$(cat scope)" = "multi" ]; then
+            cp output/pdf/champion-final.pdf site/dist/champion-final.pdf
+          else
+            [ ! -e site/dist/champion-final ] \
+              || { echo "失败：scope=single 但构建产物含加赛页——加赛页路由应随场景缺席"; exit 1; }
+            echo "单桌场景：不部署加赛页与加赛纸"
+          fi
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

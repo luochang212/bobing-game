@@ -87,12 +87,13 @@ python3 -m venv tmp/reading-check
 ./tmp/reading-check/bin/python -m playwright install chromium webkit
 ```
 
-构建并启动预览；PDF 的复制步骤与部署工作流一致：
+构建并启动预览；PDF 的复制步骤与部署工作流一致（`scope=multi` 时另复制加赛纸 PDF，单桌场景脚本会断言加赛页 404）：
 
 ```sh
 cd site
 npm run build
 cp ../output/pdf/rules-paper.pdf dist/rules-paper.pdf
+if [ "$(cat ../scope)" = "multi" ]; then cp ../output/pdf/champion-final.pdf dist/champion-final.pdf; fi
 npm run preview -- --host 127.0.0.1 --port 4322
 ```
 

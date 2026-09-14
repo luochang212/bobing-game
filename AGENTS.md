@@ -1,15 +1,19 @@
 # AGENTS.md
 
-本仓库交付一套中秋活动用的 A4 黑白单页博饼规则物料，支持多版本：**桌内规则纸**
-（按奖品模型分版本）与**状元王加赛纸**（独立一张，服务决赛桌）。PDF 由源稿编译
+本仓库交付一套中秋活动用的 A4 黑白单页博饼规则物料：**桌内规则纸**（按奖品模型
+分版本）与**状元王加赛纸**（独立一张，服务决赛桌）。当前版本与活动场景分别由仓库根
+`current`（版本）与 `scope`（`single`/`multi`）两个指针表达，交付集合随场景：单桌
+一份纸一个网页，多桌另含加赛纸与加赛网页。PDF 由源稿编译
 生成，Python 脚本对规则文字做机器验证，docs 记录每个决策的依据。规则内容定位是
 "本次活动统一版"（本场约定），不得表述为各地统一传统。
 
 ## 版本模型
 
-- 仓库根的 `current` 是指针文件，内容一行版本名；`make pdf` 只编译它指向的版本，
-  `output/pdf/rules-paper.pdf` 是唯一桌内交付 PDF，永远等于当前版本。网站构建时读
-  同一指针，只渲染当前版本（见 `site/`）。
+- 仓库根的 `current` 是版本指针（一行版本名），`scope` 是场景指针（一行
+  `single`/`multi`），两者正交：奖品模型归 `current`，单桌还是多桌归 `scope`。
+  `make pdf` 按双指针同步交付——`output/pdf/rules-paper.pdf` 永远等于当前版本；
+  `multi` 另交付加赛纸，`single` 清掉加赛纸残留。网站构建时读同一对指针，
+  只渲染当前版本，加赛页仅 `multi` 场景构建（见 `site/`）。
 - `versions/<名>/` 每个版本自含全部版本特有内容：
   - `rules-paper.tex`：完整独立原稿（不做宏模板、不 `\input` 共享文件）；
   - `README.md`：定位、依据链接，以及行首声明的元数据——**规则族**（同族
@@ -20,7 +24,8 @@
   - `site-data.json`：讲解页全量文案（Astro 构建时按指针加载）。
 - `versions/` 下的版本都是**桌内规则纸**：只写桌内玩法，不出现状元王内容
   （状元王是决赛桌的另一个游戏，由独立的加赛纸承载，见下）。
-- `champion-final/` 是**状元王加赛纸**，独立一张、不随指针变化：各桌状元同台
+- `champion-final/` 是**状元王加赛纸**，源稿单一共享（与奖品模型无关、不随
+  `current` 变化），是否纳入交付由 `scope` 决定：各桌状元同台
   轮掷决胜的完整规则（参加座次、判定与当选、连续无状元时、小提醒）。其状元
   等级表与各桌版本第三节逐字一致，由 `scripts/version_consistency.py` 跨件比对；
   停止条件已成文（挑战一轮站住封盘＋10 轮无状元比总和兜底），设计依据见
@@ -29,7 +34,7 @@
   整段（奖级表、状元表、异常与收尾、记录栏）、跨族共识块（第一、三节与
   出碗叠骰行）、状元等级表跨件比对、site-data 核心/流程键两档；改共享内容
   必须同步对应源稿。
-- 换版本 = 改 `current` → `make pdf` → 提交。新增版本 = 新建 `versions/<名>/`
+- 换版本/场景 = 改 `current` 或 `scope` → `make pdf` → 提交。新增版本 = 新建 `versions/<名>/`
   （tex、README 含特征句、site-data.json）→ `make pdf-all` 编译检查 → 全套验证。
 - 版本名只描述自己（如 `classic`＝标准 63 份），"当前用哪个"只由
   `current` 表达；文件名一律英文，文件内容保持中文。
@@ -37,6 +42,8 @@
 ## 文件职责
 
 - `current`：版本指针，一行版本名。
+- `scope`：场景指针，一行 `single`/`multi`——决定加赛纸 PDF、`/champion-final/`
+  网页与主页页脚是否属于交付（单桌一份纸一个网页；多桌两份纸两个网页）。
 - `versions/`：版本仓库（结构见上）。
 - `scripts/state_machine.py`：按桌内规则纸文字逐条实现的状态机与验证（46656 种骰面
   全枚举归类、tiered 20 项＋pooled 5 项确定性剧本、随机整局模拟）。它镜像 tex
@@ -47,13 +54,14 @@
 - `scripts/version_consistency.py`：各源稿共享内容一致性检查（纯标准库，CI 兜底），
   按规则族分档比对，状元等级表跨件比对。
 - `scripts/web_reading_check.py`：讲解页的浏览器回归检查（七种视口 × Chromium/WebKit、
-  目录跳转、无脚本阅读），以当前版本 tex 为骰面基准；依赖 Playwright，运行方式见
+  目录跳转、无脚本阅读），以当前版本 tex 为骰面基准；页脚与加赛页检查按 `scope`
+  分支，`single` 场景断言加赛页 404。依赖 Playwright，运行方式见
   `docs/mobile-reading-check.md`。
 - `scripts/paper_output_check.py`：检查交付 PDF 单页与底部安全线，渲染三档清晰度并
   解码二维码，可更新 `docs/preview.png`；`--compare-ref` 可对照历史提交（含英文化前
   旧路径回退）；依赖与命令见 `docs/local-dev-and-verification.md`。
 - `champion-final/`：状元王加赛纸（源稿 `rules-paper.tex`＋README 含特征句），
-  编译产物为 `output/pdf/champion-final.pdf`。
+  编译产物为 `output/pdf/champion-final.pdf`（仅 `multi` 场景交付）。
 - `docs/rule-audit.md`：决策与证据的留痕——资料来源、每处修订的原因、已知规格空白。
   改规则必须同步补记。
 - `docs/mobile-reading-check.md`：网页阅读体验的核查记录与可重复检查命令。
@@ -62,10 +70,11 @@
 - `README.md`：使用说明 + 版本表（仓库内的版本列表）+ 游戏流程 mermaid 图。
 - `site/`：讲解网页（Astro + Tailwind，部署到 GitHub Pages，workflow 为
   `.github/workflows/site.yml`）。主页构建时读 `current`、加载当前版本的
-  `site-data.json` 渲染桌内规则，不设多版本路由；页脚按版本数据二选一——
-  多桌有状元王环节的版本放互跳入口（`footer.cross`），纯桌内版本放祝福语
-  占位（`footer.blessing`）；`/champion-final/` 为加赛纸
-  的网页版，数据取自 `champion-final/site-data.json`，不随指针。主页正文不出现
+  `site-data.json` 渲染桌内规则，不设多版本路由；页脚由 `scope` 派生——
+  `multi` 放互跳入口、`single` 放祝福语占位（版本 site-data 不含页脚配置）；
+  `/champion-final/` 为加赛纸的网页版，数据取自 `champion-final/site-data.json`，
+  不随 `current` 变化，仅 `multi` 场景构建（可选 rest 路由，`getStaticPaths`
+  依 `scope` 返回空即整页缺席）。主页正文不出现
   加赛内容（与桌纸不含状元王同构）。定位是"解释与举例"，
   不是第二份规则权威源：页面措辞逐句对齐 tex，页头注明"以现场纸质规则为准"；
   改规则若影响页面举例，同步更新对应源稿的 site-data.json。
@@ -74,8 +83,8 @@
 ## 常用命令
 
 ```sh
-make pdf                        # 编译 current 指向的版本，产物复制到 output/pdf/rules-paper.pdf
-make pdf-final                  # 编译状元王加赛纸，产物复制到 output/pdf/champion-final.pdf
+make pdf                        # 按 current＋scope 同步交付：桌内纸必编；multi 连带加赛纸，single 清残留
+make pdf-final                  # 编译状元王加赛纸并落位（仅 multi 场景，single 拒绝）
 make pdf-all                    # 编译全部版本与加赛纸供检查（只落 build/，不动交付位）
 python3 scripts/state_machine.py          # 桌内状态机验证，必须全部通过
 python3 scripts/champion_final.py         # 加赛状态机验证，必须全部通过
@@ -108,9 +117,10 @@ tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐
 
 ## 硬性约束
 
-- **PDF 输出位置协议**：仓库交付两份 PDF——桌内纸 `output/pdf/rules-paper.pdf`
-  （内容必须等于 `current` 指向的版本，CI 用特征句兜底）与加赛纸
-  `output/pdf/champion-final.pdf`（内容必须与 `champion-final/` 源稿一致）；
+- **PDF 输出位置协议**：交付集合随 `scope`——桌内纸 `output/pdf/rules-paper.pdf`
+  永远等于 `current` 指向的版本（CI 用特征句兜底）；`multi` 场景另交付加赛纸
+  `output/pdf/champion-final.pdf`（内容必须与 `champion-final/` 源稿一致），
+  `single` 场景 `output/` 不得存在加赛纸（CI 反向断言兜底）；
   编译一律走 `make pdf` / `make pdf-final`（latexmk 中间产物只落 `build/<名>/`）。
   禁止在仓库根目录直接运行 xelatex——根目录或 `output/` 之外出现同名 PDF 即
   散落产物，直接删除，不入库、不 review。
@@ -131,7 +141,8 @@ tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐
 2. `python3 scripts/state_machine.py` 全绿（归类唯一、tiered 20 剧本＋pooled 5 剧本、三组随机）；
 3. `python3 scripts/champion_final.py` 全绿（加赛 8 剧本、随机整局）；
 4. `python3 scripts/version_consistency.py` 全绿（同族整段、跨族共识块、状元等级表跨件、site-data 两档）；
-5. 两份交付 PDF 均 1 页、yMax ≤ 806；桌内 PDF 含当前版本 README 声明的特征句，
+5. 交付 PDF（随场景：single 一份、multi 两份）均 1 页、yMax ≤ 806；single 时
+   `output/` 无加赛纸残留；桌内 PDF 含当前版本 README 声明的特征句，
    加赛纸 PDF 含其 README 声明的特征句；`pdftotext` 抽查确认新措辞已写入；
 6. 若改了流程图，节点/边与脚本状态机逐条对照；
 7. 若改了 `site/`，跑 `scripts/web_reading_check.py`（Chromium 与 WebKit，命令见
@@ -146,6 +157,10 @@ tex、验证脚本、docs 描述同一套规则，任何语义修改一次改齐
 
 ## 当前已知状态
 
+- 活动场景位 `scope` 2026-09-15 上线：单桌（`single`）交付仅桌内物料，多桌
+  （`multi`）另含加赛纸与 `/champion-final/` 页；"是否多桌"此前烧在 flexible 的
+  site-data 页脚键里，现已移出版本数据、由 `scope` 派生（决策与备选方案见
+  `docs/rule-audit.md`）。
 - 版本模型 2026-09-12 上线，同日按"每张纸只服务自己那张桌子"完成剥离：桌内纸
   回归纯桌内规则（`classic` 标准六十三份 / `flexible` 灵活奖品两版），状元王加赛
   独立成纸 `champion-final/`（原带钩子的两版已删，git 历史可查）。

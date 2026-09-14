@@ -12,6 +12,8 @@ parser.add_argument('--channel', help='使用本机 Chrome 时传 chrome，仅�
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
 current = (root / 'current').read_text().strip()
+scope = (root / 'scope').read_text().strip()
+assert scope in ('single', 'multi'), f'scope 文件内容须为 single 或 multi（当前 {scope!r}）'
 tex = (root / 'versions' / current / 'rules-paper.tex').read_text()
 source_rolls = {tuple(re.findall(r'\d', group)) for group in re.findall(r'\\roll((?:\{\d\}){6})', tex)}
 source_rolls.update(tuple(re.findall(r'\d', group)) for group in re.findall(r'[1-6](?:、[1-6]){5}', tex))
@@ -88,44 +90,51 @@ with sync_playwright() as p:
         assert page.url.endswith('#main')
         assert page.locator('#overview-title').bounding_box()['y'] >= page.locator('.reading-nav').bounding_box()['height']
         assert page.locator('.prize-condition:visible').count() == 6
-        # 页脚按版本场景二选一：有跨链则无祝福语；纯桌内则祝福语占位、无跨链。
-        footer_cfg = json.loads((root / 'versions' / current / 'site-data.json').read_text()).get('footer', {})
-        if footer_cfg.get('cross'):
-            assert page.locator('.site-footer a[href$="champion-final/"]').count() == 1, '跨链版本页脚应有加赛页入口'
-            assert page.locator('.site-footer > p').count() == 0, '跨链版本页脚不应有祝福语'
+        # 页脚按活动场景（scope）二选一：多桌含加赛 → 互跳入口、无祝福语；单桌 → 祝福语占位、无跨链。
+        if scope == 'multi':
+            assert page.locator('.site-footer a[href$="champion-final/"]').count() == 1, '多桌场景页脚应有加赛页入口'
+            assert page.locator('.site-footer > p').count() == 0, '多桌场景页脚不应有祝福语'
         else:
-            assert page.locator('.site-footer > p').count() == 1, '纯桌内版本页脚应有祝福语'
-            assert page.locator('.site-footer a[href$="champion-final/"]').count() == 0, '纯桌内版本页脚不应有加赛入口'
+            assert page.locator('.site-footer > p').count() == 1, '单桌场景页脚应有祝福语'
+            assert page.locator('.site-footer a[href$="champion-final/"]').count() == 0, '单桌场景页脚不应有加赛入口'
         page.get_by_role('navigation', name='规则目录').get_by_role('link', name='小提醒', exact=True).click()
         assert page.url.endswith('#questions')
         page.locator('.faq-list summary').first.click()
         assert page.locator('.faq-list details[open]').count() == 1
         context.close()
-        # 状元王加赛页：可达、四节结构、骰面与加赛纸源稿一致、加赛纸 PDF 可下载。
-        context = browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, reduced_motion='reduce')
-        page = context.new_page()
-        errors = []
-        page.on('pageerror', lambda error: errors.append(str(error)))
-        response = page.goto(args.url + 'champion-final/', wait_until='networkidle')
-        assert response.status == 200, '加赛页不可达'
-        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), '加赛页 390px 横向溢出'
-        ids = page.locator('main > section[id]').evaluate_all('(items) => items.map(el => el.id)')
-        assert ids == ['join', 'judge', 'dry', 'tips'], f'加赛页节结构：{ids}'
-        final_rolls = {tuple(re.findall(r'\d', group)) for group in
-                       re.findall(r'\\roll((?:\{\d\}){6})', (root / 'champion-final' / 'rules-paper.tex').read_text())}
-        rolls = page.locator('.roll')
-        assert rolls.count() == 6, '加赛页应只展示状元等级表的 6 组骰面'
-        for roll in rolls.all():
-            label = roll.get_attribute('aria-label')
-            assert tuple(re.findall(r'\d', label)) in final_rolls, label
-        final_pdf = page.request.get(args.url + 'champion-final.pdf')
-        assert final_pdf.status == 200 and final_pdf.body().startswith(b'%PDF'), '加赛纸 PDF 不可下载'
-        cross = page.locator('.site-footer a', has_text='桌内规则')
-        assert cross.count() == 1 and (cross.first.get_attribute('href') or '').endswith('/bobing-game/'), \
-            '加赛页页脚应能跳回桌内规则主页'
-        assert not errors, errors
-        context.close()
-        print(f'PASS {args.browser}：7 种视口、六档直接阅读、13 组源稿骰面、目录触摸/鼠标跳转、章节直达、问答、PDF、无脚本阅读；'
-              f'加赛页四节结构、6 组骰面、加赛纸 PDF。')
+        # 加赛页随场景交付：单桌不构建，直接访问应 404（"指针与产物一致"的逆向兜底）。
+        if scope != 'multi':
+            context = browser.new_context(viewport={'width': 390, 'height': 844})
+            response = context.request.get(args.url + 'champion-final/')
+            assert response.status == 404, '单桌场景加赛页不应存在'
+            context.close()
+            print(f'PASS {args.browser}：7 种视口、六档直接阅读、13 组源稿骰面、目录触摸/鼠标跳转、章节直达、问答、PDF、'
+                  f'无脚本阅读；单桌场景加赛页缺席（404）。')
+        else:
+            context = browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, reduced_motion='reduce')
+            page = context.new_page()
+            errors = []
+            page.on('pageerror', lambda error: errors.append(str(error)))
+            response = page.goto(args.url + 'champion-final/', wait_until='networkidle')
+            assert response.status == 200, '加赛页不可达'
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), '加赛页 390px 横向溢出'
+            ids = page.locator('main > section[id]').evaluate_all('(items) => items.map(el => el.id)')
+            assert ids == ['join', 'judge', 'dry', 'tips'], f'加赛页节结构：{ids}'
+            final_rolls = {tuple(re.findall(r'\d', group)) for group in
+                           re.findall(r'\\roll((?:\{\d\}){6})', (root / 'champion-final' / 'rules-paper.tex').read_text())}
+            rolls = page.locator('.roll')
+            assert rolls.count() == 6, '加赛页应只展示状元等级表的 6 组骰面'
+            for roll in rolls.all():
+                label = roll.get_attribute('aria-label')
+                assert tuple(re.findall(r'\d', label)) in final_rolls, label
+            final_pdf = page.request.get(args.url + 'champion-final.pdf')
+            assert final_pdf.status == 200 and final_pdf.body().startswith(b'%PDF'), '加赛纸 PDF 不可下载'
+            cross = page.locator('.site-footer a', has_text='桌内规则')
+            assert cross.count() == 1 and (cross.first.get_attribute('href') or '').endswith('/bobing-game/'), \
+                '加赛页页脚应能跳回桌内规则主页'
+            assert not errors, errors
+            context.close()
+            print(f'PASS {args.browser}：7 种视口、六档直接阅读、13 组源稿骰面、目录触摸/鼠标跳转、章节直达、问答、PDF、无脚本阅读；'
+                  f'加赛页四节结构、6 组骰面、加赛纸 PDF。')
     finally:
         browser.close()
