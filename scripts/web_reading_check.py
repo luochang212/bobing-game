@@ -33,6 +33,13 @@ with sync_playwright() as p:
             response = page.goto(args.url, wait_until='networkidle')
             assert response.status == 200
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'{width}px 横向溢出'
+            # 品牌标须填满自己的方框：曾因子 svg 被页脚外链箭头的选择器命中，页脚只剩 10px 的小点。
+            for slot in ('.site-header .brand-die', '.site-footer .brand-die'):
+                chip = page.locator(slot).bounding_box()
+                mark = page.locator(f'{slot} svg').bounding_box()
+                assert abs(mark['width'] - chip['width']) <= 1 and abs(mark['height'] - chip['height']) <= 1, \
+                    f'{width}px {slot} 品牌标未填满方框：{mark["width"]}×{mark["height"]} vs {chip["width"]}×{chip["height"]}'
+                assert abs(mark['x'] - chip['x']) <= 1, f'{width}px {slot} 品牌标偏离方框中心'
             assert page.locator('.game-intro:visible').count() == 1, '先建立游戏与两种发奖方式的整体认识'
             assert page.locator('.game-route > li:visible').count() == 3
             section_ids = page.locator('main > section[id]').evaluate_all('(items) => items.map(el => el.id)')
@@ -108,7 +115,7 @@ with sync_playwright() as p:
             response = context.request.get(args.url + 'champion-final/')
             assert response.status == 404, '单桌场景加赛页不应存在'
             context.close()
-            print(f'PASS {args.browser}：7 种视口、六档直接阅读、13 组源稿骰面、目录触摸/鼠标跳转、章节直达、问答、PDF、'
+            print(f'PASS {args.browser}：7 种视口、品牌标尺寸、六档直接阅读、13 组源稿骰面、目录触摸/鼠标跳转、章节直达、问答、PDF、'
                   f'无脚本阅读；单桌场景加赛页缺席（404）。')
         else:
             context = browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, reduced_motion='reduce')
@@ -134,7 +141,7 @@ with sync_playwright() as p:
                 '加赛页页脚应能跳回桌内规则主页'
             assert not errors, errors
             context.close()
-            print(f'PASS {args.browser}：7 种视口、六档直接阅读、13 组源稿骰面、目录触摸/鼠标跳转、章节直达、问答、PDF、无脚本阅读；'
-                  f'加赛页四节结构、6 组骰面、加赛纸 PDF。')
+            print(f'PASS {args.browser}：7 种视口、品牌标尺寸、六档直接阅读、13 组源稿骰面、目录触摸/鼠标跳转、章节直达、问答、PDF、'
+                  f'无脚本阅读；加赛页四节结构、6 组骰面、加赛纸 PDF。')
     finally:
         browser.close()

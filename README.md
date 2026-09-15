@@ -166,7 +166,7 @@ flowchart TD
 3. 在 `docs/rule-audit.md` 记录修改原因；更新受影响的 README 流程图与网页举例。
 4. 运行 `make pdf`、`make pdf-final` 和[完整验证](docs/local-dev-and-verification.md#机器验证)，确认两份 PDF 均为 **1 页**、内容最低点 **yMax ≤ 806pt**，并抽查 PDF 中的新措辞。
 
-规则纸保持黑白灰阶与单页约束，新增内容前先看 [AGENTS.md](AGENTS.md) 的版面约定。
+Banner 用中秋彩色，网站只在品牌与主标题点缀朱红、章节标题点缀青瓷绿；黑白要求只约束打印物料。规则纸保持黑白灰阶与单页约束，新增内容前先看 [AGENTS.md](AGENTS.md) 的版面约定。
 
 ## 📜 开源协议
 

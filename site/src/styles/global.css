@@ -5,6 +5,8 @@
   --color-muted: #626262;
   --color-mist: #f5f5f5;
   --color-line: #dedede;
+  --color-vermilion: #ae3526;
+  --color-celadon: #24665f;
   --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --font-display: "Songti SC", "STSong", "Noto Serif CJK SC", "SimSun", serif;
 }
@@ -30,7 +32,8 @@ section[id], article[id], main[id] { scroll-margin-top: 64px; }
 .skip-link:focus { transform: translateY(0); }
 .site-header { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 17px; }
-.brand-die { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--color-ink); color: #fff; border-radius: 8px; font: 20px/1 var(--font-display); }
+/* 品牌标是白描图形，靠 color 走 currentColor，底色即方框色。 */
+.brand-die { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--color-vermilion); color: #fff; border-radius: 8px; }
 .header-download { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 12px; border-radius: 5px; border: 1px solid var(--color-line); font-size: 14px; }
 svg { width: 19px; height: 19px; flex-shrink: 0; }
 .hero { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 5px 60px 22px; }
@@ -118,8 +121,14 @@ details[open] summary > span { transform: rotate(45deg); }
 .site-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; font-size: 13px; color: var(--color-muted); padding-block: 20px 35px; }
 .site-footer > a { min-height: 44px; display: inline-flex; align-items: center; }
 .site-footer .brand { font-size: 14px; color: var(--color-ink); }
-.site-footer .brand-die { width: 27px; height: 27px; font-size: 17px; }
-.site-footer > a svg { width: 10px; height: 10px; margin-left: 6px; }
+.site-footer .brand-die { width: 27px; height: 27px; }
+/* 只缩小"项目源码"后的外链箭头；:not(.brand) 防止压到品牌标（其 svg 须填满方框）。 */
+.site-footer > a:not(.brand) svg { width: 10px; height: 10px; margin-left: 6px; }
+
+.brand-die svg { width: 100%; height: 100%; display: block; }
+/* 节日色只点缀品牌与标题，阅读卡片、骰面和下载入口保持中性。 */
+h1 { color: var(--color-vermilion); }
+h2 { color: var(--color-celadon); }
 
 @media (max-width: 900px) {
   .hero { padding-inline: 0; }
@@ -133,7 +142,7 @@ details[open] summary > span { transform: rotate(45deg); }
   .shell { width: calc(100% - 36px); }
   .site-header { min-height: 62px; gap: 16px; }
   .brand { font-size: 15px; gap: 8px; }
-  .brand-die { width: 28px; height: 28px; font-size: 18px; }
+  .brand-die { width: 28px; height: 28px; }
   .header-download { padding: 4px 9px; font-size: 13px; }
   .header-download svg { width: 16px; height: 16px; }
   .hero { gap: 6px; padding-block: 16px 23px; }
