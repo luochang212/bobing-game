@@ -23,3 +23,4 @@ site/.astro/
 .zcode/
 scripts/__pycache__/
 /champion-final.pdf
+archived/
